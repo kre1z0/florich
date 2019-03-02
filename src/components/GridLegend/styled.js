@@ -1,8 +1,8 @@
 import styled from "styled-components";
-
-import { Blank } from "../../components/Atoms/Blank";
+import { Blank } from "@evergis/ui";
 
 export const GridLegendContainer = styled(Blank)`
+  overflow: hidden;
   align-items: center;
   height: 100%;
   padding: 0 20px;
@@ -14,9 +14,7 @@ export const GridLegendContainer = styled(Blank)`
 
 export const ColorsContainer = styled("div")`
   display: flex;
-  align-items: flex-end;
-  flex-shrink: 0;
-  flex-grow: 1;
+  margin: 10px 0 2px 0;
 `;
 
 export const ColorItem = styled("div")`

@@ -1,31 +1,44 @@
 import React from "react";
-import { IconToggle } from "@evergis/ui";
 
-import { FiltersContainer, Title, FilterItem, Label, Attention } from "./styled";
+import { Divider } from "../../components/Atoms/Divider";
+import { FiltersContainer, Header, Title, CloseButton, Block, Switch, Slider } from "./styled";
 
-const filters = [
-  { id: "1", label: "Поесть и выпить", icon: "phone", iconCode: "\\e978" },
-  { id: "2", label: "Спорт и экстрим", icon: "phone", iconCode: "\\e97d" },
-  { id: "3", label: "Развлечения и хобби", icon: "phone", iconCode: "\\e97a" },
-  { id: "4", label: "Релакс", icon: "phone", iconCode: "\\e97b" },
-  { id: "5", label: "Стиль", icon: "phone", iconCode: "\\e97c" }
-];
-
-export const Filters = ({ value, onFilterChange, onZoomToPoints, isVisible }) => {
-  return (
-    <FiltersContainer>
-      <Title>
-        Праздничное наступление
-        <Attention isVisible={isVisible} onClick={() => onZoomToPoints()}>
-          Приблизьте карту, чтобы увидеть объекты
-        </Attention>
-      </Title>
-      {filters.map(({ id, label, icon, iconCode }) => (
-        <FilterItem key={id} onClick={() => onFilterChange(id)} iconCode={iconCode}>
-          <IconToggle kind={icon} accent isSelected={id === value} />
-          <Label>{label}</Label>
-        </FilterItem>
-      ))}
-    </FiltersContainer>
-  );
-};
+export const Filters = ({
+  value,
+  onFilterChange,
+  onZoomToPoints,
+  isVisible,
+  onToggleFilters,
+  dayWeek,
+  interestByDay,
+  flowerShops
+}) => (
+  <FiltersContainer isVisible={isVisible}>
+    <Divider />
+    <Block>
+      <Header>
+        <Title>Интерес по дням</Title>
+        <Switch checked={interestByDay} onChange={() => onFilterChange(!interestByDay, "interestByDay")} />
+      </Header>
+      <Slider
+        isVisible={interestByDay}
+        primary
+        sliderWidth="100%"
+        showTooltips={false}
+        min={4}
+        max={8}
+        value={dayWeek}
+        marks={[5, 6, 7, 8]}
+        onChange={value => onFilterChange(value, "dayWeek")}
+        disabled={!interestByDay}
+      />
+    </Block>
+    <Block>
+      <Header>
+        <Title>Цветочные магазины</Title>
+        <Switch checked={flowerShops} onChange={() => onFilterChange(!flowerShops, "flowerShops")} />
+      </Header>
+    </Block>
+    <CloseButton kind="close" onClick={onToggleFilters} />
+  </FiltersContainer>
+);

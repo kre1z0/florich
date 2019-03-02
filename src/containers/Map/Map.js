@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { SpatialProcessor } from "@evergis/sp-api/SpatialProcessor";
 import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
@@ -16,15 +16,15 @@ import { TileService } from "evergis/services/TileService";
 
 import circleBack from "./circle_back.png";
 import starImage from "./star.png";
-import { MapWrapper } from "./styled";
+import { MapWrapper, FilterButton } from "./styled";
 import { License } from "../../components/License/License";
 import { Filters } from "../../components/Filters/Filters";
 import { ObjectCard } from "../../components/ObjectCard/ObjectCard";
-import { Controls } from "../../components/Atoms/Controls";
-import { GridLegend } from "../../components/GridLegend/GridLegend";
-import { ScaleControl } from "../../components/ScaleControl/ScaleControl";
+import { Controls } from "../../components/Controls/Controls";
+import { LocationDialog } from "../../components/LocationDialog/LocationDialog";
+import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
 
-const layerStamenToner = "stamen_toner";
+const layerStamenToner = "2gis";
 
 const layers = {
   1: {
@@ -49,14 +49,22 @@ const layers = {
   }
 };
 
-export class Map extends Component {
+export class Map extends PureComponent {
   state = {
     resolution: 200,
     zoomLvl: 9,
     selectedFilter: "1",
     selectedType: "fish",
     selectedObjectIndex: 0,
-    objects: []
+    objects: [],
+    // new
+    dayWeek: 5,
+    currentCoordinate: null,
+    locationDialogIsOpen: false,
+    infoDialogIsOpen: false,
+    interestByDay: true,
+    flowerShops: true,
+    filtersIsVisible: false
   };
 
   selectedSymbol = new MaskedImage({
@@ -180,11 +188,18 @@ export class Map extends Component {
   init() {
     const { resolution, selectedType, selectedFilter } = this.state;
 
+    navigator.permissions.query({ name: "geolocation" }).then(({ state }) => {
+      // granted prompt denied
+      if (state !== "granted") {
+        this.setState({ locationDialogIsOpen: true });
+      } else {
+      }
+    });
+
     const sp = new SpatialProcessor({
       url: "http://public.everpoint.ru/sp/",
       services: [layerStamenToner, layers[selectedFilter][selectedType]],
-      mapWrapper: this.wrapper,
-      resolution
+      mapWrapper: this.wrapper
     });
 
     const { map, painter, layerManager } = sp;
@@ -265,20 +280,20 @@ export class Map extends Component {
     this.map.zoom(value);
   };
 
-  onZoomToPoints = () => this.map.animateTo(new PointFeature([55.7417, 37.6275]), 8);
+  onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) => this.map.animateTo(new PointFeature(position), zoom);
 
   getLevel = resolution => {
     const index = this.map && this.map.tileScheme.getLevel(resolution);
 
-    if (index) {
+    if (Number.isInteger(+index)) {
       return this.map.tileScheme.levels[index].zIndex;
     }
   };
 
-  onFilterChange = selectedFilter => {
-    this.setState({ selectedFilter });
-    this.onCloseObjectCard();
-  };
+  // onFilterChange = selectedFilter => {
+  //   this.setState({ selectedFilter });
+  //   this.onCloseObjectCard();
+  // };
 
   zoomToFeature = extent => {
     const { xMin, xMax, yMax, yMin } = extent;
@@ -291,18 +306,57 @@ export class Map extends Component {
     this.setState({ selectedObjectIndex: 0, objects: [] });
   };
 
-  render() {
-    const { resolution, zoomLvl, selectedFilter, selectedType, objects, selectedObjectIndex } = this.state;
+  onFilterChange = (value, name) => {
+    this.setState({ [name]: value });
+  };
 
-    const isGridType = selectedType === "fish";
+  onEnableGeolocation = () =>
+    navigator.geolocation.getCurrentPosition(location => {
+      this.setState({
+        currentCoordinate: [location.coords.latitude, location.coords.longitude],
+        locationDialogIsOpen: false
+      });
+    });
+
+  goToLocation = () => {
+    navigator.geolocation.getCurrentPosition(location => {
+      const currentCoordinate = [location.coords.latitude, location.coords.longitude];
+      this.onZoomToPoints(currentCoordinate, 8);
+      this.setState({ currentCoordinate });
+    });
+  };
+
+  onToggleFilters = () => this.setState({ filtersIsVisible: !this.state.filtersIsVisible });
+
+  render() {
+    const {
+      dayWeek,
+      resolution,
+      zoomLvl,
+
+      selectedFilter,
+      selectedType,
+      objects,
+      selectedObjectIndex,
+      locationDialogIsOpen,
+      infoDialogIsOpen,
+      interestByDay,
+      flowerShops,
+      filtersIsVisible
+    } = this.state;
 
     return (
       <MapWrapper innerRef={this.onRefMapWrapper}>
+        {!filtersIsVisible && <FilterButton kind="settings" onClick={this.onToggleFilters} />}
         <Filters
-          isVisible={isGridType}
+          dayWeek={dayWeek}
+          interestByDay={interestByDay}
+          flowerShops={flowerShops}
+          isVisible={filtersIsVisible && objects.length === 0}
           value={selectedFilter}
           onFilterChange={this.onFilterChange}
           onZoomToPoints={this.onZoomToPoints}
+          onToggleFilters={this.onToggleFilters}
         />
         <ObjectCard
           isVisible={objects.length}
@@ -314,11 +368,18 @@ export class Map extends Component {
           onNextObject={() => this.setState({ selectedObjectIndex: selectedObjectIndex + 1 })}
           {...objects[selectedObjectIndex]}
         />
-        <Controls>
-          <ScaleControl zoomLvl={zoomLvl} onZoom={this.onZoom} resolution={resolution} />
-          <GridLegend isVisible={isGridType} />
-        </Controls>
-        <License />
+        <Controls
+          onZoom={this.onZoom}
+          goToLocation={this.goToLocation}
+          openInfoDialog={() => this.setState({ infoDialogIsOpen: true })}
+        />
+        <LocationDialog
+          onEnableGeolocation={this.onEnableGeolocation}
+          isOpen={locationDialogIsOpen}
+          onCloseRequest={() => this.setState({ locationDialogIsOpen: false })}
+        />
+        <InfoDialog isOpen={infoDialogIsOpen} onCloseRequest={() => this.setState({ infoDialogIsOpen: false })} />
+        {/*<License />*/}
       </MapWrapper>
     );
   }

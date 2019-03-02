@@ -1,8 +1,8 @@
 import styled from "styled-components";
-
-import { Blank } from "../../components/Atoms/Blank";
+import { Blank } from "@evergis/ui";
 
 export const ScaleControlContainer = styled(Blank)`
+  display: flex;
   width: 224px;
   margin-right: 10px;
   padding: 0 15px 0 5px;
