@@ -347,7 +347,7 @@ export class Map extends PureComponent {
 
     return (
       <MapWrapper innerRef={this.onRefMapWrapper}>
-        {!filtersIsVisible && <FilterButton kind="settings" onClick={this.onToggleFilters} />}
+        <FilterButton kind="settings" onClick={this.onToggleFilters} />
         <Filters
           dayWeek={dayWeek}
           interestByDay={interestByDay}
