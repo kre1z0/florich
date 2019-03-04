@@ -1,5 +1,11 @@
 import styled from "styled-components";
-import { H3, Blank, FieldValue as FieldValueUI, PaginationSimple as PaginationSimpleUI } from "@evergis/ui";
+import {
+  H3,
+  Blank,
+  FieldValue as FieldValueUI,
+  PaginationSimple as PaginationSimpleUI,
+  IconButton as IconButtonUI
+} from "@evergis/ui";
 
 export const CardContainer = styled(Blank)`
   max-width: 393px;
@@ -12,12 +18,25 @@ export const CardContainer = styled(Blank)`
   transition: opacity 144ms ease;
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
   visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
+  max-height: calc(100% - 190px);
+  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+    width: 100%;
+    max-width: none;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 0;
+  }
 `;
 
 export const Header = styled("div")`
   display: flex;
   padding: 20px;
   background-color: ${({ theme: { palette } }) => palette.primary};
+  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+    padding-top: 48px;
+  }
 `;
 
 export const Title = styled("div")`
@@ -51,4 +70,19 @@ export const FieldValue = styled(FieldValueUI)`
 
 export const PaginationSimple = styled(PaginationSimpleUI)`
   align-self: flex-start;
+`;
+
+const Button = styled(IconButtonUI)`
+  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+    top: 6px;
+    position: absolute;
+  }
+`;
+
+export const ZoomToButton = styled(Button)`
+  left: 14px;
+`;
+
+export const CloseButton = styled(Button)`
+  right: 14px;
 `;

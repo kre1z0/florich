@@ -1,8 +1,20 @@
 import React from "react";
 import { IconButton, ThemeProvider, darkTheme } from "@evergis/ui";
 
+import { Divider } from "../../components/Atoms/Divider";
 import { OutsideLink } from "../OutsideLink/OutsideLink";
-import { CardContainer, Header, MainTitle, Title, Content, PaginationSimple, SubTitle, FieldValue } from "./styled";
+import {
+  CardContainer,
+  Header,
+  MainTitle,
+  Title,
+  Content,
+  PaginationSimple,
+  ZoomToButton,
+  CloseButton,
+  SubTitle,
+  FieldValue
+} from "./styled";
 
 export const ObjectCard = props => {
   const {
@@ -24,6 +36,7 @@ export const ObjectCard = props => {
   return (
     <CardContainer isVisible={isVisible}>
       <Header>
+        <Divider />
         <ThemeProvider theme={darkTheme}>
           <>
             <Title>
@@ -38,8 +51,8 @@ export const ObjectCard = props => {
             {/*onNext={onNextObject}*/}
             {/*/>*/}
             {/*)}*/}
-            <IconButton kind="zoom-to" onClick={() => zoomToFeature(extent)} />
-            <IconButton kind="close" onClick={onClose} />
+            <ZoomToButton kind="zoom-to" onClick={() => zoomToFeature(extent)} />
+            <CloseButton kind="close" onClick={onClose} />
           </>
         </ThemeProvider>
       </Header>
