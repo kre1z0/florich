@@ -11,18 +11,21 @@ export const FiltersContainer = styled(Blank)`
   transition: opacity 144ms ease;
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
   visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
+  border-radius: 4px;
   @media (max-width: 860px) and (orientation: portrait) {
     top: 10px;
     left: 10px;
     padding: 20px 15px 20px 25px;
   }
-  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
     padding: 44px 20px 0 20px;
     top: auto;
     bottom: 0;
     left: 0;
     right: 0;
     flex-direction: column;
+    border-radius: 4px 4px 0 0;
   }
 `;
 
@@ -33,7 +36,8 @@ export const Block = styled("div")`
     margin-right: 45px;
     width: 260px;
   }
-  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
     width: 100%;
     margin-right: 0;
     margin-bottom: 30px;
@@ -55,7 +59,8 @@ export const Switch = styled(SwitchUI)``;
 
 export const Slider = styled(SliderUi)`
   margin-top: 15px;
-  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
     display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
   }
 `;
@@ -68,7 +73,8 @@ export const CloseButton = styled(IconButton)`
     top: 16px;
     right: 14px;
   }
-  @media (max-width: 767px) and (orientation: portrait), (max-width: 812px) and (orientation: landscape) {
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
     top: 5px;
     right: 10px;
   }

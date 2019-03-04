@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Divider } from "../../components/Atoms/Divider";
+import { StaticLegend } from "../../components/StaticLegend/StaticLegend";
 import { FiltersContainer, Header, Title, CloseButton, Block, Switch, Slider } from "./styled";
 
 export const Filters = ({
@@ -18,7 +19,10 @@ export const Filters = ({
     <Block>
       <Header>
         <Title>Интерес по дням</Title>
-        <Switch checked={interestByDay} onChange={() => onFilterChange(!interestByDay, "interestByDay")} />
+        <Switch
+          checked={interestByDay}
+          onChange={() => onFilterChange(!interestByDay, "interestByDay")}
+        />
       </Header>
       <Slider
         isVisible={interestByDay}
@@ -36,8 +40,12 @@ export const Filters = ({
     <Block>
       <Header>
         <Title>Цветочные магазины</Title>
-        <Switch checked={flowerShops} onChange={() => onFilterChange(!flowerShops, "flowerShops")} />
+        <Switch
+          checked={flowerShops}
+          onChange={() => onFilterChange(!flowerShops, "flowerShops")}
+        />
       </Header>
+      <StaticLegend />
     </Block>
     <CloseButton kind="close" onClick={onToggleFilters} />
   </FiltersContainer>

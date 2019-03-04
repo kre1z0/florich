@@ -1,8 +1,8 @@
 import React from "react";
-import { Dialog, RaisedButton } from "@evergis/ui";
+import { RaisedButton } from "@evergis/ui";
 
 import { Divider } from "../../components/Atoms/Divider";
-import { DialogTitle, DialogActions } from "../../components/Atoms/Dialog";
+import { Dialog, DialogTitle, DialogActions } from "../../components/Atoms/Dialog";
 import { DialogContent, FlatButton } from "./styled";
 
 export const LocationDialog = ({ isOpen, onCloseRequest, onEnableGeolocation }) => (

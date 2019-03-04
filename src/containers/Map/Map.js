@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React, { Component } from "react";
 import { SpatialProcessor } from "@evergis/sp-api/SpatialProcessor";
 import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
@@ -8,12 +8,16 @@ import { MaskedImage } from "sgis/symbols/point/MaskedImage";
 import { PointFeature } from "sgis/features/PointFeature";
 import { Connector } from "evergis/Connector";
 import { DataViewService } from "evergis/services/DataViewService";
+import { LayerGroup } from "sgis/LayerGroup";
 import { MapService } from "evergis/services/MapService";
 import { ServiceContainer } from "evergis/services/ServiceContainer";
 import { ServiceGroupService } from "evergis/services/ServiceGroupService";
 import { StaticSourceService } from "evergis/services/StaticSourceService";
 import { TileService } from "evergis/services/TileService";
+import { Color } from "sgis/utils/Color";
 
+import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
+import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 import circleBack from "./circle_back.png";
 import starImage from "./star.png";
 import { MapWrapper, FilterButton } from "./styled";
@@ -24,32 +28,27 @@ import { Controls } from "../../components/Controls/Controls";
 import { LocationDialog } from "../../components/LocationDialog/LocationDialog";
 import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
 
-const layerStamenToner = "2gis";
+const baseLayer = "2gis";
 
 const layers = {
-  1: {
-    fish: "layer_a8c5ffe2949e4011a532ecd53ec903db",
-    poi: "layer_a3be7c1ebc384695ac2a80088f82476e"
-  },
-  2: {
-    fish: "layer_05cc7b1cce804318b2a65d459ef35d99",
-    poi: "layer_3576be5d0250480fb8a1beccb1dc63a6"
-  },
-  3: {
-    fish: "layer_68c5103d2c254e25921eb47a7c212fcf",
-    poi: "layer_4fca37f171274595832729a83a3c0ffc"
-  },
   4: {
-    fish: "layer_7ab22ac5b37a4d02b672c5ddfa7e9d3a",
-    poi: "layer_4e19bdfc18f24b53b1107a6aa4d52392"
+    hm: "layer_bfe876efa2234fa589b12ac08821da40"
   },
   5: {
-    fish: "layer_1cb2a0c680aa46d5adc4d6fd815a10ad",
-    poi: "layer_71fc40594d8e4337a80ec0f466e44c80"
+    hm: "layer_ab2004f1c6e2406cb93808c94817c769"
+  },
+  6: {
+    hm: "layer_a1d584770410408e82be6854b9d24fe8"
+  },
+  7: {
+    hm: "layer_e6b67213e70044a6a63d157c9e39b03c"
+  },
+  8: {
+    hm: "layer_583456c8470741c79a792c4917ddd16d"
   }
 };
 
-export class Map extends PureComponent {
+export class Map extends Component {
   state = {
     resolution: 200,
     zoomLvl: 9,
@@ -64,7 +63,7 @@ export class Map extends PureComponent {
     infoDialogIsOpen: false,
     interestByDay: true,
     flowerShops: true,
-    filtersIsVisible: false
+    filtersIsVisible: true
   };
 
   selectedSymbol = new MaskedImage({
@@ -89,17 +88,13 @@ export class Map extends PureComponent {
 
   componentDidUpdate(
     prevProps,
-    { selectedType: prevSelectedType, selectedFilter: prevSelectedFilter, selectedObjectIndex: prevSelectedObjectIndex }
+    {
+      selectedObjectIndex: prevSelectedObjectIndex,
+      dayWeek: prevDayWeek,
+      interestByDay: prevInterestByDay
+    }
   ) {
-    const { selectedType, selectedFilter, selectedObjectIndex, objects } = this.state;
-
-    if (prevSelectedType !== selectedType) {
-      this.filterLayersByType(prevSelectedType);
-    }
-
-    if (prevSelectedFilter !== selectedFilter) {
-      this.filterLayersByValue(prevSelectedFilter);
-    }
+    const { selectedObjectIndex, objects, dayWeek, interestByDay } = this.state;
 
     if (prevSelectedObjectIndex !== selectedObjectIndex) {
       const nextObject = objects[selectedObjectIndex];
@@ -107,6 +102,18 @@ export class Map extends PureComponent {
 
       if (nextPosition) {
         this.setSelectedSymbol(nextPosition);
+      }
+    }
+
+    if (prevDayWeek !== dayWeek) {
+      this.setHeatmapLayer(layers[dayWeek].hm);
+    }
+
+    if (prevInterestByDay !== interestByDay) {
+      if (interestByDay) {
+        this.setHeatmapLayer(layers[dayWeek].hm);
+      } else {
+        this.layerGroup.layers = [];
       }
     }
   }
@@ -198,7 +205,7 @@ export class Map extends PureComponent {
 
     const sp = new SpatialProcessor({
       url: "http://public.everpoint.ru/sp/",
-      services: [layerStamenToner, layers[selectedFilter][selectedType]],
+      services: [baseLayer],
       mapWrapper: this.wrapper
     });
 
@@ -212,7 +219,34 @@ export class Map extends PureComponent {
     this.sp = sp;
     this.painter = painter;
     this.layerManager = layerManager;
+
+    this.layerGroup = new LayerGroup();
+    this.map.insertLayer(this.layerGroup, 1);
+    this.setHeatmapLayer(layers[4].hm);
   }
+
+  setHeatmapLayer = name => {
+    const colors = ["#000000ff", "#808702e0", "#a3de0099", "#baff2600", "#d9ff7800", "#edf0f922"];
+    const breaks = "0,0.2,0.35,0.5,0.75,1";
+
+    const colorsParam =
+      "[" +
+      colors.map(color => "'" + new Color(color).toString("hex").replace("#", "") + "'").join(",") +
+      "]";
+
+    const layer = new HeatmapLayer({
+      serviceUrl: this.sp.connector.url + name,
+      options: {
+        pointGrowRadius: "10",
+        attribute: "",
+        breaks: "[" + breaks + "]",
+        colors: colorsParam
+      }
+    });
+
+    this.layerGroup.layers = [];
+    this.layerGroup.addLayer(layer);
+  };
 
   filterLayersByType = prevType => {
     const { selectedFilter, selectedType } = this.state;
@@ -280,7 +314,8 @@ export class Map extends PureComponent {
     this.map.zoom(value);
   };
 
-  onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) => this.map.animateTo(new PointFeature(position), zoom);
+  onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) =>
+    this.map.animateTo(new PointFeature(position), zoom);
 
   getLevel = resolution => {
     const index = this.map && this.map.tileScheme.getLevel(resolution);
@@ -289,11 +324,6 @@ export class Map extends PureComponent {
       return this.map.tileScheme.levels[index].zIndex;
     }
   };
-
-  // onFilterChange = selectedFilter => {
-  //   this.setState({ selectedFilter });
-  //   this.onCloseObjectCard();
-  // };
 
   zoomToFeature = extent => {
     const { xMin, xMax, yMax, yMin } = extent;
@@ -306,7 +336,13 @@ export class Map extends PureComponent {
     this.setState({ selectedObjectIndex: 0, objects: [] });
   };
 
+  // onFilterChange = selectedFilter => {
+  //   this.setState({ selectedFilter });
+  //   this.onCloseObjectCard();
+  // };
+
   onFilterChange = (value, name) => {
+    console.info("--> onFilterChange ggwp", name);
     this.setState({ [name]: value });
   };
 
@@ -347,7 +383,9 @@ export class Map extends PureComponent {
 
     return (
       <MapWrapper innerRef={this.onRefMapWrapper}>
-        <FilterButton kind="settings" onClick={this.onToggleFilters} />
+        <FilterButton onClick={this.onToggleFilters}>
+          <FlowerIcon />
+        </FilterButton>
         <Filters
           dayWeek={dayWeek}
           interestByDay={interestByDay}
@@ -378,8 +416,11 @@ export class Map extends PureComponent {
           isOpen={locationDialogIsOpen}
           onCloseRequest={() => this.setState({ locationDialogIsOpen: false })}
         />
-        <InfoDialog isOpen={infoDialogIsOpen} onCloseRequest={() => this.setState({ infoDialogIsOpen: false })} />
-        {/*<License />*/}
+        <InfoDialog
+          isOpen={infoDialogIsOpen}
+          onCloseRequest={() => this.setState({ infoDialogIsOpen: false })}
+        />
+        <License />
       </MapWrapper>
     );
   }

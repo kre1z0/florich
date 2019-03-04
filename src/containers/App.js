@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import styled from "styled-components";
 import { injectGlobal } from "styled-components";
-import { injectGlobals, ThemeProvider, getTheme, GlobalsContainer as GlobalsContainerUI } from "@evergis/ui";
+import {
+  injectGlobals,
+  ThemeProvider,
+  getTheme,
+  GlobalsContainer as GlobalsContainerUI,
+  Overlay
+} from "@evergis/ui";
 import { hsl } from "polished";
 
 import { Map } from "./Map/Map";
@@ -12,6 +18,9 @@ injectGlobal`
     height: 100%;
     overflow: hidden;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  ${Overlay} {
+    background-color: rgba(255, 243, 248, 0.65);
   }
 `;
 
@@ -25,9 +34,9 @@ export const GlobalsContainer = styled(GlobalsContainerUI)`
 `;
 
 export const palette = {
-  primary: hsl(321, 1, 0.77),
-  primaryDark: hsl(322, 1, 0.74),
-  primaryDeep: hsl(324, 1, 0.71)
+  primary: hsl(335, 1, 0.7),
+  primaryDark: hsl(336, 1, 0.67),
+  primaryDeep: hsl(338, 1, 0.63)
 };
 
 export const theme = getTheme({ palette });
