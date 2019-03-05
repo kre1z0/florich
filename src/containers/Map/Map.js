@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Bowser from "bowser";
-import isEqual from "lodash/isEqual";
 import { SpatialProcessor } from "@evergis/sp-api/SpatialProcessor";
 import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
@@ -23,6 +22,7 @@ import { OutsideLink } from "../../components/OutsideLink/OutsideLink";
 import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
 import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 
+import { getElementWidthAndHeight } from "../../utils/dom";
 import { ViewportHeight } from "../../components/ViewportHeight/ViewportHeight";
 import selectedPin from "./flpin42_select.png";
 import { MapWrapper, FilterButton, Error, Swiper } from "./styled";
@@ -33,7 +33,8 @@ import { Controls } from "../../components/Controls/Controls";
 import { LocationDialog } from "../../components/LocationDialog/LocationDialog";
 import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
 
-const baseLayer = "2gis";
+// const baseLayer = "2gis";
+const baseLayer = "osm";
 
 const flowerShopsLayer = "layer_02531cf0f3064520a348f73a8d214ab0";
 
@@ -60,13 +61,13 @@ export class Map extends Component {
     selectedObjectIndex: 0,
     objects: [],
     dayWeek: 5,
-    currentCoordinate: null,
     locationDialogIsOpen: false,
     infoDialogIsOpen: false,
     interestByDay: true,
     flowerShops: true,
     filtersIsVisible: true,
-    hasError: false
+    hasError: false,
+    panelHeight: 0
   };
 
   selectedSymbol = new StaticImageSymbol({
@@ -76,30 +77,29 @@ export class Map extends Component {
     source: selectedPin
   });
 
-  // locationSymbol = new PointSymbol();
-  locationSymbol = new StaticImageSymbol({
-    width: 42,
-    height: 42,
-    anchorPoint: [21, 21],
-    source: selectedPin
+  locationSymbol = new PointSymbol({
+    size: 20,
+    strokeColor: "#3D3D3D",
+    strokeWidth: 4,
+    fillColor: "#fff"
   });
 
   layer = new FeatureLayer();
+  currentLocationLayer = new FeatureLayer();
   heatmapLayer = null;
+  panel = null;
 
   componentDidMount() {
     this.init();
   }
 
   componentWillUnmount() {
+    window.removeEventListener("resize", this.mapOffset);
     this.map.off("click", this.onMapClick);
   }
 
-  componentDidUpdate(
-    prevProps,
-    { selectedObjectIndex: prevSelectedObjectIndex, currentCoordinate: prevCurrentCoordinate }
-  ) {
-    const { selectedObjectIndex, objects, currentCoordinate } = this.state;
+  componentDidUpdate(prevProps, { selectedObjectIndex: prevSelectedObjectIndex }) {
+    const { selectedObjectIndex, objects } = this.state;
 
     if (prevSelectedObjectIndex !== selectedObjectIndex) {
       const nextObject = objects[selectedObjectIndex];
@@ -109,11 +109,36 @@ export class Map extends Component {
         this.setSelectedSymbol(nextPosition);
       }
     }
-
-    if (!isEqual(prevCurrentCoordinate, currentCoordinate)) {
-      this.setLocationPoint(currentCoordinate);
-    }
   }
+
+  setLocationPoint = () => {
+    const Point = new PointFeature(this.map.centerPoint.position, {
+      symbol: this.locationSymbol,
+      crs: this.map.crs
+    });
+    this.currentLocationLayer.features = [];
+    this.currentLocationLayer.add([Point]);
+  };
+
+  setSelectedSymbol = position => {
+    const Point = new PointFeature(position, {
+      symbol: this.selectedSymbol,
+      crs: this.map.crs
+    });
+    this.layer.features = [];
+    this.layer.add([Point]);
+  };
+
+  goToLocation = () => {
+    navigator.geolocation.getCurrentPosition(location => {
+      const currentCoordinate = [location.coords.latitude, location.coords.longitude];
+      this.onZoomToPoints(currentCoordinate, this.map.minResolution);
+      this.setLocationPoint();
+    });
+  };
+
+  onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) =>
+    this.map.setPosition(new PointFeature(position), zoom);
 
   setObjects = features => {
     if (features.length === 0) {
@@ -152,15 +177,6 @@ export class Map extends Component {
     }
   };
 
-  setSelectedSymbol = position => {
-    const Point = new PointFeature([position[1], position[0]], {
-      symbol: this.locationSymbol,
-      crs: this.map.crs
-    });
-    this.layer.features = [];
-    this.layer.add([Point]);
-  };
-
   onMapClick = ({ point }) => {
     const resolution = this.map.resolution;
 
@@ -187,6 +203,13 @@ export class Map extends Component {
       .catch(error => console.error(error));
   };
 
+  mapOffset = () => {
+    if (this.panel) {
+      const { height } = getElementWidthAndHeight(this.panel);
+      this.setState({ panelHeight: height });
+    }
+  };
+
   init() {
     const { dayWeek } = this.state;
 
@@ -199,9 +222,8 @@ export class Map extends Component {
 
     if ((isMobile || isTablet) && isIos) {
       navigator.geolocation.getCurrentPosition(
-        location => {
+        () => {
           this.setState({
-            currentCoordinate: [location.coords.latitude, location.coords.longitude],
             locationDialogIsOpen: false
           });
         },
@@ -218,6 +240,11 @@ export class Map extends Component {
       });
     }
 
+    if (isMobile) {
+      this.mapOffset();
+      window.removeEventListener("resize", this.mapOffset);
+    }
+
     const sp = new SpatialProcessor({
       url: "https://public.everpoint.ru/sp/",
       services: [baseLayer, flowerShopsLayer],
@@ -229,6 +256,7 @@ export class Map extends Component {
     map.maxResolution = 9444;
     map.on("click", this.onMapClick);
     map.addLayer(this.layer);
+    map.addLayer(this.currentLocationLayer);
     this.map = map;
     this.sp = sp;
     this.painter = painter;
@@ -241,12 +269,6 @@ export class Map extends Component {
         console.error(error);
       });
   }
-
-  setLocationPoint = position => {
-    const Point = new PointFeature(position, { symbol: this.locationSymbol, crs: this.map.crs });
-    this.layer.features = [];
-    this.layer.add([Point]);
-  };
 
   setHeatmapLayer = name => {
     const colors = ["#000000ff", "#808702e0", "#a3de0099", "#baff2600", "#d9ff7800", "#edf0f922"];
@@ -279,9 +301,6 @@ export class Map extends Component {
   onZoom = value => {
     this.map.zoom(value);
   };
-
-  onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) =>
-    this.map.animateTo(new PointFeature(position), zoom);
 
   zoomToFeature = extent => {
     const { xMin, xMax, yMax, yMin } = extent;
@@ -340,20 +359,11 @@ export class Map extends Component {
   }
 
   onEnableGeolocation = () =>
-    navigator.geolocation.getCurrentPosition(location => {
+    navigator.geolocation.getCurrentPosition(() => {
       this.setState({
-        currentCoordinate: [location.coords.latitude, location.coords.longitude],
         locationDialogIsOpen: false
       });
     });
-
-  goToLocation = () => {
-    navigator.geolocation.getCurrentPosition(location => {
-      const currentCoordinate = [location.coords.latitude, location.coords.longitude];
-      this.onZoomToPoints(currentCoordinate, this.map.minResolution);
-      this.setState({ currentCoordinate });
-    });
-  };
 
   onToggleFilters = () => this.setState({ filtersIsVisible: !this.state.filtersIsVisible });
 
@@ -375,6 +385,12 @@ export class Map extends Component {
     }
   };
 
+  onRefPanel = ref => {
+    if (ref) {
+      this.panel = ref;
+    }
+  };
+
   render() {
     const {
       dayWeek,
@@ -385,12 +401,15 @@ export class Map extends Component {
       interestByDay,
       flowerShops,
       filtersIsVisible,
-      hasError
+      hasError,
+      panelHeight
     } = this.state;
 
     if (hasError) {
       return (
         <Error>
+          Houston, we have a problem.
+          <br />
           Something went wrong.
           <br />
           <OutsideLink style={{ fontSize: 20 }} href="https://mar8.everpoint.ru/" target="_self">
@@ -402,22 +421,15 @@ export class Map extends Component {
 
     return (
       <Swiper preventDefaultTouchmoveEvent={objects.length === 0}>
-        <MapWrapper innerRef={this.onRefMapWrapper}>
+        <MapWrapper
+          innerRef={this.onRefMapWrapper}
+          style={{ height: `calc(100% - ${filtersIsVisible ? panelHeight : 0}px)` }}
+        >
           <Helmet />
           <ViewportHeight />
           <FilterButton onClick={this.onToggleFilters}>
             <FlowerIcon />
           </FilterButton>
-          <Filters
-            onSwiped={this.onSwipedFilters}
-            dayWeek={dayWeek}
-            interestByDay={interestByDay}
-            flowerShops={flowerShops}
-            isVisible={filtersIsVisible && objects.length === 0}
-            onFilterChange={this.onFilterChange}
-            onZoomToPoints={this.onZoomToPoints}
-            onToggleFilters={this.onToggleFilters}
-          />
           <ObjectCard
             isVisible={objects.length}
             currentPage={selectedObjectIndex + 1}
@@ -449,6 +461,17 @@ export class Map extends Component {
           />
           <License />
         </MapWrapper>
+        <Filters
+          onRefPanel={this.onRefPanel}
+          onSwiped={this.onSwipedFilters}
+          dayWeek={dayWeek}
+          interestByDay={interestByDay}
+          flowerShops={flowerShops}
+          isVisible={filtersIsVisible && objects.length === 0}
+          onFilterChange={this.onFilterChange}
+          onZoomToPoints={this.onZoomToPoints}
+          onToggleFilters={this.onToggleFilters}
+        />
       </Swiper>
     );
   }

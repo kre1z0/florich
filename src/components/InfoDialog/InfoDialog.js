@@ -5,8 +5,8 @@ import chartDesktop from "./chart-desktop.svg";
 import chartMobile from "./chart-mobile.svg";
 import { Swiper } from "../../components/Swiper/Swiper";
 import { Divider } from "../../components/Atoms/Divider";
-import { Dialog, DialogTitle, DialogActions } from "../../components/Atoms/Dialog";
-import { DialogContent, RaisedButton, Link, ChartTitle, Chart } from "./styled";
+import {  DialogActions } from "../../components/Atoms/Dialog";
+import { DialogContent, RaisedButton, Link, ChartTitle, Chart, Dialog, DialogTitle } from "./styled";
 
 export const InfoDialog = ({ isOpen, onCloseRequest, onSwiped }) => {
   const browser = Bowser.getParser(window.navigator.userAgent);

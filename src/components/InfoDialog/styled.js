@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { RaisedButton as RaisedButtonUI, H3 } from "@evergis/ui";
+import { Dialog as DialogUI, DialogTitle as DialogTitleUI } from "../../components/Atoms/Dialog";
 
+import bg from "./bg.svg";
 import { DialogContent as DialogContentUI } from "../../components/Atoms/Dialog";
 import { Link as LinkUI } from "../OutsideLink/OutsideLink";
 
@@ -26,4 +28,15 @@ export const ChartTitle = styled(H3)``;
 export const Chart = styled("img")`
   width: 100%;
   height: auto;
+`;
+
+export const DialogTitle = styled(DialogTitleUI)`
+  background-color: transparent;
+`;
+
+export const Dialog = styled(DialogUI)`
+  background: #fff url(${bg});
+  background-position: top right;
+  background-size: 226px;
+  background-repeat: no-repeat;
 `;

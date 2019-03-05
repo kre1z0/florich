@@ -46,10 +46,14 @@ export const Error = styled("h1")`
   left: 50%;
   transform: translate(-50%, -50%);
   color: rgb(255, 105, 51);
+  width: calc(100% - 24px);
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
+    font-size: 18px;
+  }
 `;
 
 export const Swiper = styled(SwiperUI)`
   width: 100%;
   height: 100%;
 `;
-

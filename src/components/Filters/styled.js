@@ -4,7 +4,6 @@ import { H3, Blank, IconButton, Switch as SwitchUI, Slider as SliderUi } from "@
 import { Swiper as SwiperUI } from "../../components/Swiper/Swiper";
 
 export const FiltersContainer = styled(Blank)`
-  display: flex;
   z-index: 5;
   position: absolute;
   top: 15px;
@@ -24,7 +23,6 @@ export const FiltersContainer = styled(Blank)`
     bottom: 0;
     left: 0;
     right: 0;
-    flex-direction: column;
     border-radius: 4px 4px 0 0;
   }
 `;
@@ -108,12 +106,14 @@ export const CloseButton = styled(IconButton)`
 `;
 
 export const Swiper = styled(SwiperUI)`
+  display: flex;
   padding: 25px 20px 25px 30px;
   @media (max-width: 860px) and (orientation: portrait) {
     padding: 20px 15px 20px 25px;
   }
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
+    flex-direction: column;
     padding: 44px 20px 0 20px;
   }
 `;

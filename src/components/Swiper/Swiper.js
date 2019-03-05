@@ -55,8 +55,10 @@ export class Swiper extends Component {
   };
 
   onSwiperRef = ref => {
+    const { onRef } = this.props;
     if (ref) {
       this.swipeableNode = ref;
+      onRef && onRef(ref);
     }
   };
 
@@ -77,7 +79,7 @@ export class Swiper extends Component {
   };
 
   render() {
-    const { children, ...props } = this.props;
+    const { children, onRef, ...props } = this.props;
 
     return (
       <Swipeable

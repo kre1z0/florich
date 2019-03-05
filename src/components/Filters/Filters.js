@@ -21,10 +21,11 @@ export const Filters = ({
   dayWeek,
   interestByDay,
   flowerShops,
-  onSwiped
+  onSwiped,
+  onRefPanel,
 }) => (
   <FiltersContainer isVisible={isVisible}>
-    <Swiper onSwiped={onSwiped}>
+    <Swiper onSwiped={onSwiped} onRef={onRefPanel}>
       <Divider />
       <Block>
         <Header>
