@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 import { IconButton } from "../../components/Controls/styled";
+import { Swiper as SwiperUI } from "../../components/Swiper/Swiper";
 
 export const MapWrapper = styled("div")`
   width: 100%;
@@ -46,3 +47,9 @@ export const Error = styled("h1")`
   transform: translate(-50%, -50%);
   color: rgb(255, 105, 51);
 `;
+
+export const Swiper = styled(SwiperUI)`
+  width: 100%;
+  height: 100%;
+`;
+

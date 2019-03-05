@@ -18,13 +18,14 @@ import { StaticSourceService } from "evergis/services/StaticSourceService";
 import { TileService } from "evergis/services/TileService";
 import { Color } from "sgis/utils/Color";
 
+import { Helmet } from "../../components/Helmet/Helmet";
 import { OutsideLink } from "../../components/OutsideLink/OutsideLink";
 import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
 import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 
 import { ViewportHeight } from "../../components/ViewportHeight/ViewportHeight";
 import selectedPin from "./flpin42_select.png";
-import { MapWrapper, FilterButton, Error } from "./styled";
+import { MapWrapper, FilterButton, Error, Swiper } from "./styled";
 import { License } from "../../components/License/License";
 import { Filters } from "../../components/Filters/Filters";
 import { ObjectCard } from "../../components/ObjectCard/ObjectCard";
@@ -75,10 +76,11 @@ export class Map extends Component {
     source: selectedPin
   });
 
+  // locationSymbol = new PointSymbol();
   locationSymbol = new StaticImageSymbol({
-    width: 10,
-    height: 10,
-    anchorPoint: [5, 5],
+    width: 42,
+    height: 42,
+    anchorPoint: [21, 21],
     source: selectedPin
   });
 
@@ -238,7 +240,10 @@ export class Map extends Component {
   }
 
   setLocationPoint = position => {
-    const Point = new PointFeature(position, { symbol: this.locationSymbol, crs: this.map.crs });
+    const Point = new PointFeature(position, {
+      symbol: this.locationSymbol,
+      crs: this.map.crs
+    });
     this.layer.features = [];
     this.layer.add([Point]);
   };
@@ -352,6 +357,24 @@ export class Map extends Component {
 
   onToggleFilters = () => this.setState({ filtersIsVisible: !this.state.filtersIsVisible });
 
+  onSwipedFilters = ({ isDown, yRatio }) => {
+    if (isDown && yRatio > 40) {
+      this.onToggleFilters();
+    }
+  };
+
+  onSwipedInfoDialog = ({ isDown, yRatio }) => {
+    if (isDown && yRatio > 40) {
+      this.setState({ infoDialogIsOpen: false });
+    }
+  };
+
+  onSwipedLocationDialog = ({ isDown, yRatio }) => {
+    if (isDown && yRatio > 40) {
+      this.setState({ locationDialogIsOpen: false });
+    }
+  };
+
   render() {
     const {
       dayWeek,
@@ -378,49 +401,55 @@ export class Map extends Component {
     }
 
     return (
-      <MapWrapper innerRef={this.onRefMapWrapper}>
-        <ViewportHeight />
-        <FilterButton onClick={this.onToggleFilters}>
-          <FlowerIcon />
-        </FilterButton>
-        <Filters
-          dayWeek={dayWeek}
-          interestByDay={interestByDay}
-          flowerShops={flowerShops}
-          isVisible={filtersIsVisible && objects.length === 0}
-          onFilterChange={this.onFilterChange}
-          onZoomToPoints={this.onZoomToPoints}
-          onToggleFilters={this.onToggleFilters}
-        />
-        <ObjectCard
-          isVisible={objects.length}
-          currentPage={selectedObjectIndex + 1}
-          pageCount={objects.length}
-          zoomToFeature={this.zoomToFeature}
-          onClose={this.onCloseObjectCard}
-          onPrevObject={() => this.setState({ selectedObjectIndex: selectedObjectIndex - 1 })}
-          onNextObject={() => this.setState({ selectedObjectIndex: selectedObjectIndex + 1 })}
-          {...objects[selectedObjectIndex]}
-        />
-        <Controls
-          onZoom={this.onZoom}
-          goToLocation={this.goToLocation}
-          openInfoDialog={e => {
-            e.preventDefault();
-            this.setState({ infoDialogIsOpen: true });
-          }}
-        />
-        <LocationDialog
-          onEnableGeolocation={this.onEnableGeolocation}
-          isOpen={locationDialogIsOpen}
-          onCloseRequest={() => this.setState({ locationDialogIsOpen: false })}
-        />
-        <InfoDialog
-          isOpen={infoDialogIsOpen}
-          onCloseRequest={() => this.setState({ infoDialogIsOpen: false })}
-        />
-        <License />
-      </MapWrapper>
+      <Swiper preventDefaultTouchmoveEvent={objects.length === 0}>
+        <MapWrapper innerRef={this.onRefMapWrapper}>
+          <Helmet />
+          <ViewportHeight />
+          <FilterButton onClick={this.onToggleFilters}>
+            <FlowerIcon />
+          </FilterButton>
+          <Filters
+            onSwiped={this.onSwipedFilters}
+            dayWeek={dayWeek}
+            interestByDay={interestByDay}
+            flowerShops={flowerShops}
+            isVisible={filtersIsVisible && objects.length === 0}
+            onFilterChange={this.onFilterChange}
+            onZoomToPoints={this.onZoomToPoints}
+            onToggleFilters={this.onToggleFilters}
+          />
+          <ObjectCard
+            isVisible={objects.length}
+            currentPage={selectedObjectIndex + 1}
+            pageCount={objects.length}
+            zoomToFeature={this.zoomToFeature}
+            onClose={this.onCloseObjectCard}
+            onPrevObject={() => this.setState({ selectedObjectIndex: selectedObjectIndex - 1 })}
+            onNextObject={() => this.setState({ selectedObjectIndex: selectedObjectIndex + 1 })}
+            {...objects[selectedObjectIndex]}
+          />
+          <Controls
+            onZoom={this.onZoom}
+            goToLocation={this.goToLocation}
+            openInfoDialog={e => {
+              e.preventDefault();
+              this.setState({ infoDialogIsOpen: true });
+            }}
+          />
+          <LocationDialog
+            onSwiped={this.onSwipedLocationDialog}
+            onEnableGeolocation={this.onEnableGeolocation}
+            isOpen={locationDialogIsOpen}
+            onCloseRequest={() => this.setState({ locationDialogIsOpen: false })}
+          />
+          <InfoDialog
+            onSwiped={this.onSwipedInfoDialog}
+            isOpen={infoDialogIsOpen}
+            onCloseRequest={() => this.setState({ infoDialogIsOpen: false })}
+          />
+          <License />
+        </MapWrapper>
+      </Swiper>
     );
   }
 }

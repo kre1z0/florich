@@ -20,7 +20,7 @@ export const CardContainer = styled(Blank)`
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
   visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
   border-radius: 4px;
-  max-height: calc(100% - 188px);
+  max-height: 100%;
   overflow-y: overlay;
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {

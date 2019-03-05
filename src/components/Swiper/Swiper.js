@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 // https://github.com/dogfessional/react-swipeable
-import { Swipeable } from "react-swipeable";
+import Swipeable from "react-swipeable";
 
 import { getElementWidthAndHeight } from "../../utils/dom";
 
@@ -17,7 +17,7 @@ export class Swiper extends Component {
       isDown: !y
     };
   }
-  onSwiping;
+
   // ratio of percentage
   ratioDistance = (deltaX, deltaY) => {
     if (!this.swipeableNode) {

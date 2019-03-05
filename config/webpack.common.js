@@ -107,7 +107,6 @@ module.exports = {
       }
     }),
     new HTMLPlugin({
-      title: "Florich",
       template,
       minify: true,
       filename: "index.html",
