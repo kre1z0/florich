@@ -1,13 +1,14 @@
 import styled from "styled-components";
 import { H3, Blank, IconButton, Switch as SwitchUI, Slider as SliderUi } from "@evergis/ui";
 
+import { Swiper as SwiperUI } from "../../components/Swiper/Swiper";
+
 export const FiltersContainer = styled(Blank)`
   display: flex;
   z-index: 5;
   position: absolute;
   top: 15px;
   left: 15px;
-  padding: 25px 20px 25px 30px;
   transition: transform 144ms ease;
   transform-origin: calc(64px / 2) calc(64px / 2);
   transform: ${({ isVisible }) => (isVisible ? "scale(1)" : "scale(0)")};
@@ -15,12 +16,10 @@ export const FiltersContainer = styled(Blank)`
   @media (max-width: 860px) and (orientation: portrait) {
     top: 10px;
     left: 10px;
-    padding: 20px 15px 20px 25px;
   }
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
     transform-origin: 50% calc(100% - 40px);
-    padding: 44px 20px 0 20px;
     top: auto;
     bottom: 0;
     left: 0;
@@ -105,5 +104,16 @@ export const CloseButton = styled(IconButton)`
     (max-width: 812px) and (orientation: landscape) {
     top: 5px;
     right: 10px;
+  }
+`;
+
+export const Swiper = styled(SwiperUI)`
+  padding: 25px 20px 25px 30px;
+  @media (max-width: 860px) and (orientation: portrait) {
+    padding: 20px 15px 20px 25px;
+  }
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
+    padding: 44px 20px 0 20px;
   }
 `;

@@ -1,9 +1,17 @@
 import React from "react";
 
-import { Swiper } from "../../components/Swiper/Swiper";
 import { Divider } from "../../components/Atoms/Divider";
 import { StaticLegend } from "../../components/StaticLegend/StaticLegend";
-import { FiltersContainer, Header, Title, CloseButton, Block, Switch, Slider } from "./styled";
+import {
+  FiltersContainer,
+  Header,
+  Title,
+  CloseButton,
+  Block,
+  Switch,
+  Slider,
+  Swiper
+} from "./styled";
 
 export const Filters = ({
   onFilterChange,

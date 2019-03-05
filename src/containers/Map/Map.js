@@ -153,7 +153,10 @@ export class Map extends Component {
   };
 
   setSelectedSymbol = position => {
-    const Point = new PointFeature(position, { symbol: this.selectedSymbol, crs: this.map.crs });
+    const Point = new PointFeature([position[1], position[0]], {
+      symbol: this.locationSymbol,
+      crs: this.map.crs
+    });
     this.layer.features = [];
     this.layer.add([Point]);
   };
@@ -240,10 +243,7 @@ export class Map extends Component {
   }
 
   setLocationPoint = position => {
-    const Point = new PointFeature(position, {
-      symbol: this.locationSymbol,
-      crs: this.map.crs
-    });
+    const Point = new PointFeature(position, { symbol: this.locationSymbol, crs: this.map.crs });
     this.layer.features = [];
     this.layer.add([Point]);
   };

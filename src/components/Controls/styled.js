@@ -9,7 +9,7 @@ export const IconButton = styled(IconButtonUi)`
   position: absolute;
   z-index: 4;
   border-radius: 50%;
-  background-color: rgb(255, 255, 255, 1);
+  background: #fff;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
   > span {
     &:after {
