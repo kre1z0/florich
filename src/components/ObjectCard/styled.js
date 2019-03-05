@@ -6,6 +6,7 @@ import {
   PaginationSimple as PaginationSimpleUI,
   IconButton as IconButtonUI
 } from "@evergis/ui";
+import { getHeaderColorByWeight } from "./getHeaderColorByWeight";
 
 export const CardContainer = styled(Blank)`
   max-width: 393px;
@@ -19,7 +20,7 @@ export const CardContainer = styled(Blank)`
   opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
   visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
   border-radius: 4px;
-  max-height: calc(100% - 244px);
+  max-height: calc(100% - 188px);
   overflow-y: overlay;
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
@@ -36,7 +37,7 @@ export const CardContainer = styled(Blank)`
 export const Header = styled("div")`
   display: flex;
   padding: 10px 10px 20px 20px;
-  background-color: ${({ theme: { palette } }) => palette.primary};
+  background-color: ${({ weight }) => getHeaderColorByWeight(weight)};
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
     padding-top: 48px;

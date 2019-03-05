@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import Bowser from "bowser";
+import isEqual from "lodash/isEqual";
 import { SpatialProcessor } from "@evergis/sp-api/SpatialProcessor";
 import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
@@ -16,11 +18,13 @@ import { StaticSourceService } from "evergis/services/StaticSourceService";
 import { TileService } from "evergis/services/TileService";
 import { Color } from "sgis/utils/Color";
 
+import { OutsideLink } from "../../components/OutsideLink/OutsideLink";
 import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
 import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 
+import { ViewportHeight } from "../../components/ViewportHeight/ViewportHeight";
 import selectedPin from "./flpin42_select.png";
-import { MapWrapper, FilterButton } from "./styled";
+import { MapWrapper, FilterButton, Error } from "./styled";
 import { License } from "../../components/License/License";
 import { Filters } from "../../components/Filters/Filters";
 import { ObjectCard } from "../../components/ObjectCard/ObjectCard";
@@ -60,13 +64,21 @@ export class Map extends Component {
     infoDialogIsOpen: false,
     interestByDay: true,
     flowerShops: true,
-    filtersIsVisible: true
+    filtersIsVisible: true,
+    hasError: false
   };
 
   selectedSymbol = new StaticImageSymbol({
     width: 42,
     height: 42,
     anchorPoint: [21, 21],
+    source: selectedPin
+  });
+
+  locationSymbol = new StaticImageSymbol({
+    width: 10,
+    height: 10,
+    anchorPoint: [5, 5],
     source: selectedPin
   });
 
@@ -81,8 +93,11 @@ export class Map extends Component {
     this.map.off("click", this.onMapClick);
   }
 
-  componentDidUpdate(prevProps, { selectedObjectIndex: prevSelectedObjectIndex }) {
-    const { selectedObjectIndex, objects } = this.state;
+  componentDidUpdate(
+    prevProps,
+    { selectedObjectIndex: prevSelectedObjectIndex, currentCoordinate: prevCurrentCoordinate }
+  ) {
+    const { selectedObjectIndex, objects, currentCoordinate } = this.state;
 
     if (prevSelectedObjectIndex !== selectedObjectIndex) {
       const nextObject = objects[selectedObjectIndex];
@@ -91,6 +106,10 @@ export class Map extends Component {
       if (nextPosition) {
         this.setSelectedSymbol(nextPosition);
       }
+    }
+
+    if (!isEqual(prevCurrentCoordinate, currentCoordinate)) {
+      this.setLocationPoint(currentCoordinate);
     }
   }
 
@@ -165,16 +184,37 @@ export class Map extends Component {
 
   init() {
     const { dayWeek } = this.state;
-    navigator.permissions.query({ name: "geolocation" }).then(({ state }) => {
-      // granted prompt denied
-      if (state !== "granted") {
-        this.setState({ locationDialogIsOpen: true });
-      } else {
-      }
-    });
+
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    const { parsedResult } = browser;
+    const { platform, os } = parsedResult;
+    const isMobile = platform.type === "mobile";
+    const isTablet = platform.type === "tablet";
+    const isIos = os.name === "iOS";
+
+    if ((isMobile || isTablet) && isIos) {
+      navigator.geolocation.getCurrentPosition(
+        location => {
+          this.setState({
+            currentCoordinate: [location.coords.latitude, location.coords.longitude],
+            locationDialogIsOpen: false
+          });
+        },
+        () => {
+          this.setState({ locationDialogIsOpen: true });
+        }
+      );
+    } else {
+      navigator.permissions.query({ name: "geolocation" }).then(({ state }) => {
+        // granted prompt denied
+        if (state !== "granted") {
+          this.setState({ locationDialogIsOpen: true });
+        }
+      });
+    }
 
     const sp = new SpatialProcessor({
-      url: "http://public.everpoint.ru/sp/",
+      url: "https://public.everpoint.ru/sp/",
       services: [baseLayer, flowerShopsLayer],
       mapWrapper: this.wrapper
     });
@@ -196,6 +236,12 @@ export class Map extends Component {
         console.error(error);
       });
   }
+
+  setLocationPoint = position => {
+    const Point = new PointFeature(position, { symbol: this.locationSymbol, crs: this.map.crs });
+    this.layer.features = [];
+    this.layer.add([Point]);
+  };
 
   setHeatmapLayer = name => {
     const colors = ["#000000ff", "#808702e0", "#a3de0099", "#baff2600", "#d9ff7800", "#edf0f922"];
@@ -284,6 +330,10 @@ export class Map extends Component {
     });
   };
 
+  componentDidCatch() {
+    this.setState({ hasError: true });
+  }
+
   onEnableGeolocation = () =>
     navigator.geolocation.getCurrentPosition(location => {
       this.setState({
@@ -311,11 +361,25 @@ export class Map extends Component {
       infoDialogIsOpen,
       interestByDay,
       flowerShops,
-      filtersIsVisible
+      filtersIsVisible,
+      hasError
     } = this.state;
+
+    if (hasError) {
+      return (
+        <Error>
+          Something went wrong.
+          <br />
+          <OutsideLink style={{ fontSize: 20 }} href="https://mar8.everpoint.ru/" target="_self">
+            reload page
+          </OutsideLink>
+        </Error>
+      );
+    }
 
     return (
       <MapWrapper innerRef={this.onRefMapWrapper}>
+        <ViewportHeight />
         <FilterButton onClick={this.onToggleFilters}>
           <FlowerIcon />
         </FilterButton>

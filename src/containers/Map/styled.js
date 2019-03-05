@@ -37,3 +37,12 @@ export const FilterButton = styled(IconButton)`
     bottom: 14px;
   }
 `;
+
+export const Error = styled("h1")`
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgb(255, 105, 51);
+`;

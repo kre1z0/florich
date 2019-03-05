@@ -29,7 +29,6 @@ export const getWeekDay = weekDay => {
 const isHolyday = schedule => !schedule[0][0];
 
 export const getScheduleValue = (string = "") => {
-  console.info("--> getScheduleValue ggwp 4444", string);
   let workWeek = [];
   if (string) {
     try {
@@ -69,6 +68,7 @@ export const getScheduleValue = (string = "") => {
     const prevTimeRange = array[index - 1];
     const [startHours, startMinutes] = time[0].split(":");
     const [endHours, endMinutes] = time[1].split(":");
+    const endHoursRange = +startHours > +endHours ? +endHours + 24 : endHours;
 
     const startDate = new Date(
       currentYear,
@@ -77,7 +77,13 @@ export const getScheduleValue = (string = "") => {
       +startHours,
       +startMinutes
     );
-    const endDate = new Date(currentYear, currentMonth, currentDateNumber, +endHours, +endMinutes);
+    const endDate = new Date(
+      currentYear,
+      currentMonth,
+      currentDateNumber,
+      +endHoursRange,
+      +endMinutes
+    );
 
     if (prevTimeRange) {
       const prevTime = prevTimeRange[prevTimeRange.length - 1];
@@ -105,7 +111,9 @@ export const getScheduleValue = (string = "") => {
       : nextWorkingWeekDayIndex - weekDayNewStandart;
 
   const dayAndNight =
-    !isHolyday(currentDayFromWorkWeek) && currentDayFromWorkWeek[0][1] === "24:00";
+    !isHolyday(currentDayFromWorkWeek) &&
+    currentDayFromWorkWeek[0][0] === "00:00" &&
+    currentDayFromWorkWeek[0][1] === "24:00";
 
   if (workWeek.length < 1) {
     return "График работы не известен";

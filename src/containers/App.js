@@ -15,10 +15,10 @@ import { Map } from "./Map/Map";
 injectGlobal`
   html, body, #app {
     width: 100%;
-    height: 100%;
-    min-height: 100%;
     overflow: hidden;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
   }
   ${Overlay} {
     background-color: rgba(255, 243, 248, 0.65);

@@ -4,8 +4,8 @@ import { ThemeProvider, darkTheme } from "@evergis/ui";
 import { Swiper } from "../../components/Swiper/Swiper";
 import { Divider } from "../../components/Atoms/Divider";
 import { OutsideLink } from "../OutsideLink/OutsideLink";
-import { getScheduleValue } from "./getScheduleValue";
 import { getWeightText } from "./getWeightText";
+import { TimeField } from "./TimeField";
 import {
   CardContainer,
   Header,
@@ -40,7 +40,7 @@ export const ObjectCard = props => {
 
   return (
     <CardContainer isVisible={isVisible}>
-      <Header>
+      <Header weight={weight}>
         <Divider />
         <ThemeProvider theme={darkTheme}>
           <>
@@ -63,7 +63,10 @@ export const ObjectCard = props => {
       </Header>
       <Content>
         <FieldValue field="Адрес" value={address} />
-        <FieldValue field="Часы работы" value={getScheduleValue(work_time)} />
+        <TimeField
+          field="Часы работы"
+          value={work_time}
+        />
         {site && site !== "-" && (
           <FieldValue
             field="Сайт"
