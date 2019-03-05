@@ -33,8 +33,7 @@ import { Controls } from "../../components/Controls/Controls";
 import { LocationDialog } from "../../components/LocationDialog/LocationDialog";
 import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
 
-// const baseLayer = "2gis";
-const baseLayer = "osm";
+const baseLayer = "2gis";
 
 const flowerShopsLayer = "layer_02531cf0f3064520a348f73a8d214ab0";
 
@@ -57,18 +56,28 @@ const heatmapLayers = {
 };
 
 export class Map extends Component {
-  state = {
-    selectedObjectIndex: 0,
-    objects: [],
-    dayWeek: 5,
-    locationDialogIsOpen: false,
-    infoDialogIsOpen: false,
-    interestByDay: true,
-    flowerShops: true,
-    filtersIsVisible: true,
-    hasError: false,
-    panelHeight: 0
-  };
+  constructor(props) {
+    super(props);
+
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    const { parsedResult } = browser;
+    const { platform } = parsedResult;
+    const isMobile = platform.type === "mobile";
+
+    this.state = {
+      selectedObjectIndex: 0,
+      objects: [],
+      dayWeek: 5,
+      locationDialogIsOpen: false,
+      infoDialogIsOpen: false,
+      interestByDay: true,
+      flowerShops: true,
+      filtersIsVisible: true,
+      hasError: false,
+      panelHeight: 0,
+      isMobile
+    };
+  }
 
   selectedSymbol = new StaticImageSymbol({
     width: 42,
@@ -90,6 +99,8 @@ export class Map extends Component {
   panel = null;
 
   componentDidMount() {
+    this.mapOffset();
+    window.addEventListener("resize", this.mapOffset);
     this.init();
   }
 
@@ -240,11 +251,6 @@ export class Map extends Component {
       });
     }
 
-    if (isMobile) {
-      this.mapOffset();
-      window.removeEventListener("resize", this.mapOffset);
-    }
-
     const sp = new SpatialProcessor({
       url: "https://public.everpoint.ru/sp/",
       services: [baseLayer, flowerShopsLayer],
@@ -322,6 +328,7 @@ export class Map extends Component {
       },
       () => {
         if (name === "interestByDay") {
+          this.mapOffset();
           if (value) {
             this.setHeatmapLayer(heatmapLayers[dayWeek].hm);
           } else {
@@ -333,6 +340,7 @@ export class Map extends Component {
           this.setHeatmapLayer(heatmapLayers[value].hm);
         } else if (name === "flowerShops") {
           this.onServiceDisplay(flowerShopsLayer, value);
+          this.mapOffset();
         }
       }
     );
@@ -402,7 +410,8 @@ export class Map extends Component {
       flowerShops,
       filtersIsVisible,
       hasError,
-      panelHeight
+      panelHeight,
+      isMobile
     } = this.state;
 
     if (hasError) {
@@ -423,7 +432,7 @@ export class Map extends Component {
       <Swiper preventDefaultTouchmoveEvent={objects.length === 0}>
         <MapWrapper
           innerRef={this.onRefMapWrapper}
-          style={{ height: `calc(100% - ${filtersIsVisible ? panelHeight : 0}px)` }}
+          style={{ height: `calc(100% - ${isMobile && filtersIsVisible ? panelHeight : 0}px)` }}
         >
           <Helmet />
           <ViewportHeight />

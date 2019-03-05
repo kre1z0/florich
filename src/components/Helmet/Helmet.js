@@ -17,18 +17,27 @@ export const Helmet = props => {
         { name: "title", content: "Как москвичи покупают цветы к 8 марта" },
         {
           name: "keywords",
-          content: "GIS, LOCATION INTELLIGENCE, MAPS, DATA ANALYTICS, DATA VISUALIZATION"
+          content:
+            "GIS, Everpoint, 8 марта, LOCATION INTELLIGENCE, MAPS, DATA ANALYTICS, DATA VISUALIZATION"
         },
-        { name: "description", content: "Разработчик геоинформационных систем и сервисов." },
+        {
+          name: "description",
+          content:
+            "Спрос на цветы к 8 марта в Москве возрастает почти на 400%. Оценка проведена по данным поисковых запросов пользователей 2ГИС за 2018 г."
+        },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         { property: "og:title", content: "Как москвичи покупают цветы к 8 марта" },
         { property: "twitter:title", content: "Как москвичи покупают цветы к 8 марта" },
         { property: "og:url", content: "https://8mar.everpoint.ru" },
         { property: "og:image", content: favicon2 },
         { name: "twitter:image:src", contet: favicon2 },
-        { property: "og:description", content: "Как москвичи покупают цветы к 8 марта" },
+        {
+          property: "og:description",
+          content:
+            "Спрос на цветы к 8 марта в Москве возрастает почти на 400%. Оценка проведена по данным поисковых запросов пользователей 2ГИС за 2018 г."
+        },
         { property: "og:type", contet: "website" },
-        { property: "og:site_name", contet: "Everpoint" },
+        { property: "og:site_name", contet: "Как москвичи покупают цветы к 8 марта" },
         {
           name: "twitter:description",
           content: "Разработчик геоинформационных систем и сервисов."
