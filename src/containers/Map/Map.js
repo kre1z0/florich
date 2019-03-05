@@ -4,7 +4,7 @@ import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
 import { FeatureLayer } from "sgis/layers/FeatureLayer";
 import { PointSymbol } from "sgis/symbols/point/Point";
-import { MaskedImage } from "sgis/symbols/point/MaskedImage";
+import { StaticImageSymbol } from "sgis/symbols/point/StaticImageSymbol";
 import { PointFeature } from "sgis/features/PointFeature";
 import { Connector } from "evergis/Connector";
 import { DataViewService } from "evergis/services/DataViewService";
@@ -18,8 +18,8 @@ import { Color } from "sgis/utils/Color";
 
 import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
 import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
-import circleBack from "./circle_back.png";
-import starImage from "./star.png";
+
+import selectedPin from "./flpin42_select.png";
 import { MapWrapper, FilterButton } from "./styled";
 import { License } from "../../components/License/License";
 import { Filters } from "../../components/Filters/Filters";
@@ -30,7 +30,9 @@ import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
 
 const baseLayer = "2gis";
 
-const layers = {
+const flowerShopsLayer = "layer_02531cf0f3064520a348f73a8d214ab0";
+
+const heatmapLayers = {
   4: {
     hm: "layer_bfe876efa2234fa589b12ac08821da40"
   },
@@ -50,13 +52,8 @@ const layers = {
 
 export class Map extends Component {
   state = {
-    resolution: 200,
-    zoomLvl: 9,
-    selectedFilter: "1",
-    selectedType: "fish",
     selectedObjectIndex: 0,
     objects: [],
-    // new
     dayWeek: 5,
     currentCoordinate: null,
     locationDialogIsOpen: false,
@@ -66,35 +63,26 @@ export class Map extends Component {
     filtersIsVisible: true
   };
 
-  selectedSymbol = new MaskedImage({
-    width: 32,
-    height: 32,
-    anchorPoint: [16, 16],
-    imageSource: circleBack,
-    maskSource: starImage,
-    maskColor: "#e00f00"
+  selectedSymbol = new StaticImageSymbol({
+    width: 42,
+    height: 42,
+    anchorPoint: [21, 21],
+    source: selectedPin
   });
 
   layer = new FeatureLayer();
+  heatmapLayer = null;
 
   componentDidMount() {
     this.init();
   }
 
   componentWillUnmount() {
-    this.map.off("bboxChangeEnd", this.onBboxChangeEnd);
     this.map.off("click", this.onMapClick);
   }
 
-  componentDidUpdate(
-    prevProps,
-    {
-      selectedObjectIndex: prevSelectedObjectIndex,
-      dayWeek: prevDayWeek,
-      interestByDay: prevInterestByDay
-    }
-  ) {
-    const { selectedObjectIndex, objects, dayWeek, interestByDay } = this.state;
+  componentDidUpdate(prevProps, { selectedObjectIndex: prevSelectedObjectIndex }) {
+    const { selectedObjectIndex, objects } = this.state;
 
     if (prevSelectedObjectIndex !== selectedObjectIndex) {
       const nextObject = objects[selectedObjectIndex];
@@ -102,18 +90,6 @@ export class Map extends Component {
 
       if (nextPosition) {
         this.setSelectedSymbol(nextPosition);
-      }
-    }
-
-    if (prevDayWeek !== dayWeek) {
-      this.setHeatmapLayer(layers[dayWeek].hm);
-    }
-
-    if (prevInterestByDay !== interestByDay) {
-      if (interestByDay) {
-        this.setHeatmapLayer(layers[dayWeek].hm);
-      } else {
-        this.layerGroup.layers = [];
       }
     }
   }
@@ -126,7 +102,7 @@ export class Map extends Component {
       const objects = [];
       features.forEach((feature, index) => {
         const { attributes, bbox, position } = feature;
-        const { name, address, site, site_2gis, phone, rubrics_te } = attributes;
+        const { name, address, site, site_2gis, phone, work_time, weight } = attributes;
         const { xMin, xMax, yMax, yMin } = bbox;
 
         if (index === 0) {
@@ -134,13 +110,14 @@ export class Map extends Component {
         }
 
         objects.push({
+          weight,
           position,
           name,
           address,
           site,
           site_2gis,
           phone,
-          rubrics_te,
+          work_time,
           extent: {
             xMin,
             xMax,
@@ -161,13 +138,7 @@ export class Map extends Component {
   };
 
   onMapClick = ({ point }) => {
-    const { selectedFilter, selectedType } = this.state;
-
-    if (selectedType === "fish") return;
-
     const resolution = this.map.resolution;
-
-    const service = layers[selectedFilter][selectedType];
 
     const buffer = resolution * 20;
     const geometry = new Polygon(
@@ -186,15 +157,14 @@ export class Map extends Component {
       .pickByGeometry({
         geometry,
         resolution,
-        services: [service]
+        services: [flowerShopsLayer]
       })
       .then(features => this.setObjects(features))
       .catch(error => console.error(error));
   };
 
   init() {
-    const { resolution, selectedType, selectedFilter } = this.state;
-
+    const { dayWeek } = this.state;
     navigator.permissions.query({ name: "geolocation" }).then(({ state }) => {
       // granted prompt denied
       if (state !== "granted") {
@@ -205,24 +175,26 @@ export class Map extends Component {
 
     const sp = new SpatialProcessor({
       url: "http://public.everpoint.ru/sp/",
-      services: [baseLayer],
+      services: [baseLayer, flowerShopsLayer],
       mapWrapper: this.wrapper
     });
 
     const { map, painter, layerManager } = sp;
 
     map.maxResolution = 9444;
-    map.on("bboxChangeEnd", this.onBboxChangeEnd);
     map.on("click", this.onMapClick);
     map.addLayer(this.layer);
     this.map = map;
     this.sp = sp;
     this.painter = painter;
     this.layerManager = layerManager;
-
-    this.layerGroup = new LayerGroup();
-    this.map.insertLayer(this.layerGroup, 1);
-    this.setHeatmapLayer(layers[4].hm);
+    this.layerManager.ready
+      .then(() => {
+        this.setHeatmapLayer(heatmapLayers[dayWeek].hm);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   setHeatmapLayer = name => {
@@ -234,7 +206,11 @@ export class Map extends Component {
       colors.map(color => "'" + new Color(color).toString("hex").replace("#", "") + "'").join(",") +
       "]";
 
-    const layer = new HeatmapLayer({
+    if (this.map.layers[0].contains(this.heatmapLayer)) {
+      this.map.layers[0].removeLayer(this.heatmapLayer);
+    }
+
+    this.heatmapLayer = new HeatmapLayer({
       serviceUrl: this.sp.connector.url + name,
       options: {
         pointGrowRadius: "10",
@@ -244,68 +220,7 @@ export class Map extends Component {
       }
     });
 
-    this.layerGroup.layers = [];
-    this.layerGroup.addLayer(layer);
-  };
-
-  filterLayersByType = prevType => {
-    const { selectedFilter, selectedType } = this.state;
-
-    const hideLayerName = layers[selectedFilter][prevType];
-    const visibleLayerName = layers[selectedFilter][selectedType];
-
-    const services = this.layerManager.getServices(true);
-
-    const layersIsNotLoaded = !services.some(({ name }) => name === visibleLayerName);
-
-    if (layersIsNotLoaded) {
-      this.layerManager.loadService(visibleLayerName);
-    }
-
-    services.forEach(({ layer, name }) => {
-      if (name === hideLayerName) {
-        layer.isDisplayed = false;
-      } else if (name === visibleLayerName) {
-        layer.isDisplayed = true;
-      }
-    });
-  };
-
-  filterLayersByValue = prevValue => {
-    const { selectedFilter, selectedType } = this.state;
-
-    const services = this.layerManager.getServices(true);
-    const prevLayerName = layers[prevValue][selectedType];
-    const nextLayerName = layers[selectedFilter][selectedType];
-    const nextLayerIsNotLoaded = !services.some(({ name }) => name === nextLayerName);
-
-    if (nextLayerIsNotLoaded) {
-      this.layerManager.loadService(nextLayerName);
-    }
-
-    services.forEach(({ layer, name }) => {
-      if (name === prevLayerName) {
-        layer.isDisplayed = false;
-      } else if (name === nextLayerName) {
-        layer.isDisplayed = true;
-      }
-    });
-  };
-
-  onBboxChangeEnd = () => {
-    const resolution = this.map.resolution;
-    const zoomLvl = this.getLevel(resolution);
-    const isGridZoomLvl = zoomLvl < 14 || zoomLvl === 0;
-
-    this.setState({
-      zoomLvl: this.getLevel(resolution),
-      resolution,
-      selectedType: zoomLvl < 14 || zoomLvl === 0 ? "fish" : "poi"
-    });
-
-    if (isGridZoomLvl) {
-      this.onCloseObjectCard();
-    }
+    this.map.layers[0].insertLayer(this.heatmapLayer, 1);
   };
 
   onRefMapWrapper = ref => (this.wrapper = ref);
@@ -316,14 +231,6 @@ export class Map extends Component {
 
   onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) =>
     this.map.animateTo(new PointFeature(position), zoom);
-
-  getLevel = resolution => {
-    const index = this.map && this.map.tileScheme.getLevel(resolution);
-
-    if (Number.isInteger(+index)) {
-      return this.map.tileScheme.levels[index].zIndex;
-    }
-  };
 
   zoomToFeature = extent => {
     const { xMin, xMax, yMax, yMin } = extent;
@@ -336,14 +243,45 @@ export class Map extends Component {
     this.setState({ selectedObjectIndex: 0, objects: [] });
   };
 
-  // onFilterChange = selectedFilter => {
-  //   this.setState({ selectedFilter });
-  //   this.onCloseObjectCard();
-  // };
-
   onFilterChange = (value, name) => {
-    console.info("--> onFilterChange ggwp", name);
-    this.setState({ [name]: value });
+    const { dayWeek } = this.state;
+
+    this.setState(
+      {
+        [name]: value
+      },
+      () => {
+        if (name === "interestByDay") {
+          if (value) {
+            this.setHeatmapLayer(heatmapLayers[dayWeek].hm);
+          } else {
+            if (this.map.layers[0].contains(this.heatmapLayer)) {
+              this.map.layers[0].removeLayer(this.heatmapLayer);
+            }
+          }
+        } else if (name === "dayWeek") {
+          this.setHeatmapLayer(heatmapLayers[value].hm);
+        } else if (name === "flowerShops") {
+          this.onServiceDisplay(flowerShopsLayer, value);
+        }
+      }
+    );
+  };
+
+  onServiceDisplay = (layerName, displayed) => {
+    const services = this.layerManager.getServices(true);
+
+    const layersIsNotLoaded = !services.some(({ name }) => name === layerName);
+
+    if (layersIsNotLoaded) {
+      this.layerManager.loadService(layerName);
+    }
+
+    services.forEach(({ layer, name }) => {
+      if (name === layerName) {
+        layer.isDisplayed = displayed;
+      }
+    });
   };
 
   onEnableGeolocation = () =>
@@ -357,7 +295,7 @@ export class Map extends Component {
   goToLocation = () => {
     navigator.geolocation.getCurrentPosition(location => {
       const currentCoordinate = [location.coords.latitude, location.coords.longitude];
-      this.onZoomToPoints(currentCoordinate, 8);
+      this.onZoomToPoints(currentCoordinate, this.map.minResolution);
       this.setState({ currentCoordinate });
     });
   };
@@ -367,11 +305,6 @@ export class Map extends Component {
   render() {
     const {
       dayWeek,
-      resolution,
-      zoomLvl,
-
-      selectedFilter,
-      selectedType,
       objects,
       selectedObjectIndex,
       locationDialogIsOpen,
@@ -391,7 +324,6 @@ export class Map extends Component {
           interestByDay={interestByDay}
           flowerShops={flowerShops}
           isVisible={filtersIsVisible && objects.length === 0}
-          value={selectedFilter}
           onFilterChange={this.onFilterChange}
           onZoomToPoints={this.onZoomToPoints}
           onToggleFilters={this.onToggleFilters}
@@ -409,7 +341,10 @@ export class Map extends Component {
         <Controls
           onZoom={this.onZoom}
           goToLocation={this.goToLocation}
-          openInfoDialog={() => this.setState({ infoDialogIsOpen: true })}
+          openInfoDialog={e => {
+            e.preventDefault();
+            this.setState({ infoDialogIsOpen: true });
+          }}
         />
         <LocationDialog
           onEnableGeolocation={this.onEnableGeolocation}

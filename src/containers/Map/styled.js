@@ -32,8 +32,8 @@ export const FilterButton = styled(IconButton)`
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
     top: auto;
-    left: auto;
-    right: 10px;
-    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 14px;
   }
 `;

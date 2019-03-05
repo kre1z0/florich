@@ -5,7 +5,7 @@ import { Dialog, DialogTitle, DialogActions } from "../../components/Atoms/Dialo
 import { DialogContent, RaisedButton, Link } from "./styled";
 
 export const InfoDialog = ({ isOpen, onCloseRequest }) => (
-  <Dialog maxWidth="560px" onCloseRequest={onCloseRequest} isOpen={isOpen} modal>
+  <Dialog maxWidth="560px" onCloseRequest={onCloseRequest} isOpen={isOpen}>
     <DialogTitle>
       <Divider />
       Что это за карта?

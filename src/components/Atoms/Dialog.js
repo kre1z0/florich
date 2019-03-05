@@ -7,7 +7,12 @@ import {
   DialogTitle as DialogTitleUI
 } from "@evergis/ui";
 
-export const Dialog = styled(DialogUI)``;
+export const Dialog = styled(DialogUI)`
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
+    border-radius: 4px 4px 0 0;
+  }
+`;
 
 export const DialogTitle = styled(DialogTitleUI)`
   @media (max-width: 767px) and (orientation: portrait),

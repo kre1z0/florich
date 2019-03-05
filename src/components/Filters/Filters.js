@@ -5,7 +5,6 @@ import { StaticLegend } from "../../components/StaticLegend/StaticLegend";
 import { FiltersContainer, Header, Title, CloseButton, Block, Switch, Slider } from "./styled";
 
 export const Filters = ({
-  value,
   onFilterChange,
   onZoomToPoints,
   isVisible,
@@ -32,7 +31,7 @@ export const Filters = ({
         min={4}
         max={8}
         value={dayWeek}
-        marks={[5, 6, 7, 8]}
+        marks={[4, 5, 6, 7, 8]}
         onChange={value => onFilterChange(value, "dayWeek")}
         disabled={!interestByDay}
       />
@@ -45,7 +44,7 @@ export const Filters = ({
           onChange={() => onFilterChange(!flowerShops, "flowerShops")}
         />
       </Header>
-      <StaticLegend />
+      <StaticLegend disabled={!flowerShops} />
     </Block>
     <CloseButton kind="close" onClick={onToggleFilters} />
   </FiltersContainer>

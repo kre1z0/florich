@@ -6,7 +6,7 @@ import { Dialog, DialogTitle, DialogActions } from "../../components/Atoms/Dialo
 import { DialogContent, FlatButton } from "./styled";
 
 export const LocationDialog = ({ isOpen, onCloseRequest, onEnableGeolocation }) => (
-  <Dialog maxWidth="560px" onCloseRequest={onCloseRequest} isOpen={isOpen} modal>
+  <Dialog maxWidth="560px" onCloseRequest={onCloseRequest} isOpen={isOpen}>
     <DialogTitle>
       <Divider />
       Не можем вас найти

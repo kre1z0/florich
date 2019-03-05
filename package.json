@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "homepage": "https://github.com/kre1z0/florich",
-  "description": "defender of motherland",
+  "description": "8 march",
   "keywords": [
     "map",
     "gis",
@@ -34,6 +34,7 @@
     "query-string": "^4.3.4",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
+    "react-swipeable": "^5.0.1",
     "styled-components": "^3.4.2"
   },
   "devDependencies": {

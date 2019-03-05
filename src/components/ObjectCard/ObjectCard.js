@@ -1,9 +1,11 @@
 import React from "react";
-import { IconButton, ThemeProvider, darkTheme } from "@evergis/ui";
+import { ThemeProvider, darkTheme } from "@evergis/ui";
 
+import { Swiper } from "../../components/Swiper/Swiper";
 import { Divider } from "../../components/Atoms/Divider";
 import { OutsideLink } from "../OutsideLink/OutsideLink";
 import { getScheduleValue } from "./getScheduleValue";
+import { getWeightText } from "./getWeightText";
 import {
   CardContainer,
   Header,
@@ -17,16 +19,6 @@ import {
   FieldValue
 } from "./styled";
 
-const array = [
-  [["10:00", "13:00"], ["14:00", "19:00"]],
-  [["10:00", "13:00"], ["14:00", "19:00"]],
-  [["10:00", "13:00"], ["14:00", "19:00"]],
-  [["10:00", "13:00"], ["14:00", "19:00"]],
-  [["10:00", "13:00"], ["19:00", "20:00"]],
-  [[""]],
-  [[""]]
-];
-
 export const ObjectCard = props => {
   const {
     isVisible,
@@ -39,9 +31,11 @@ export const ObjectCard = props => {
     onClose,
     currentPage,
     extent,
+    work_time,
     pageCount,
     onPrevObject,
-    onNextObject
+    onNextObject,
+    weight
   } = props;
 
   return (
@@ -51,17 +45,17 @@ export const ObjectCard = props => {
         <ThemeProvider theme={darkTheme}>
           <>
             <Title>
+              {pageCount > 1 && (
+                <PaginationSimple
+                  currentPage={currentPage}
+                  pageCount={pageCount}
+                  onPrev={onPrevObject}
+                  onNext={onNextObject}
+                />
+              )}
               <MainTitle>{name}</MainTitle>
-              <SubTitle>Интерес покупателей на 20% выше среднего</SubTitle>
+              <SubTitle>{getWeightText(weight)}</SubTitle>
             </Title>
-            {/*{pageCount > 1 && (*/}
-            {/*<PaginationSimple*/}
-            {/*currentPage={currentPage}*/}
-            {/*pageCount={pageCount}*/}
-            {/*onPrev={onPrevObject}*/}
-            {/*onNext={onNextObject}*/}
-            {/*/>*/}
-            {/*)}*/}
             <ZoomToButton kind="zoom-to" onClick={() => zoomToFeature(extent)} />
             <CloseButton kind="close" onClick={onClose} />
           </>
@@ -69,7 +63,7 @@ export const ObjectCard = props => {
       </Header>
       <Content>
         <FieldValue field="Адрес" value={address} />
-        <FieldValue field="Часы работы" value={getScheduleValue(array)} />
+        <FieldValue field="Часы работы" value={getScheduleValue(work_time)} />
         {site && site !== "-" && (
           <FieldValue
             field="Сайт"

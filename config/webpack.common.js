@@ -111,7 +111,6 @@ module.exports = {
       template,
       minify: true,
       filename: "index.html",
-      favicon: "public/favicon.ico"
     }),
     new WebpackCdnPlugin({
       modules: [

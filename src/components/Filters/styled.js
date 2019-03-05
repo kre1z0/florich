@@ -8,9 +8,9 @@ export const FiltersContainer = styled(Blank)`
   top: 15px;
   left: 15px;
   padding: 25px 20px 25px 30px;
-  transition: opacity 144ms ease;
-  opacity: ${({ isVisible }) => (isVisible ? 1 : 0)};
-  visibility: ${({ isVisible }) => (isVisible ? "visible" : "hidden")};
+  transition: transform 144ms ease;
+  transform-origin: calc(64px / 2) calc(64px / 2);
+  transform: ${({ isVisible }) => (isVisible ? "scale(1)" : "scale(0)")};
   border-radius: 4px;
   @media (max-width: 860px) and (orientation: portrait) {
     top: 10px;
@@ -19,6 +19,7 @@ export const FiltersContainer = styled(Blank)`
   }
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
+    transform-origin: 50% calc(100% - 40px);
     padding: 44px 20px 0 20px;
     top: auto;
     bottom: 0;
@@ -62,6 +63,33 @@ export const Slider = styled(SliderUi)`
   @media (max-width: 767px) and (orientation: portrait),
     (max-width: 812px) and (orientation: landscape) {
     display: ${({ isVisible }) => (isVisible ? "flex" : "none")};
+    width: calc(100% - 20px);
+  }
+  > div:last-of-type {
+    > div {
+      color: ${({ disabled }) => (disabled ? "rgba(0, 0, 0, 0.36)" : "rgba(0, 0, 0, 0.54)")};
+    }
+    > div:first-of-type,
+    > div:last-of-type {
+      font-size: 0;
+      &:before {
+        font-size: 12px;
+      }
+    }
+    > div:first-of-type {
+      transform: translate(0, 0);
+      left: -4px;
+      &:before {
+        content: "Обычно";
+      }
+    }
+    > div:last-of-type {
+      &:before {
+        font-size: 12px;
+        content: "8 марта";
+        color: ${({ disabled }) => (disabled ? "rgba(0, 0, 0, 0.36)" : "#f6609e")};
+      }
+    }
   }
 `;
 

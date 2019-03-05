@@ -1,29 +1,14 @@
 import React from "react";
 
-import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
-import { StaticLegendContainer, Label } from "./styled";
+import { FlowerIcon20, FlowerIcon32 } from "../../components/SvgIcons/FlowerIcon";
+import { StaticLegendContainer, Label, Circle } from "./styled";
 
-const legend = [
-  {
-    width: 14,
-    height: 16
-  },
-  {
-    width: 21,
-    height: 24
-  },
-  {
-    width: 28,
-    height: 32
-  }
-];
-
-export const StaticLegend = () => {
+export const StaticLegend = ({ disabled }) => {
   return (
-    <StaticLegendContainer>
-      {legend.map(({ width, height }, index) => (
-        <FlowerIcon key={`static-legend-item-${index}`} width={width} height={height} />
-      ))}
+    <StaticLegendContainer disabled={disabled}>
+      <Circle disabled={disabled} />
+      <FlowerIcon20 disabled={disabled} />
+      <FlowerIcon32 disabled={disabled} />
       <Label>Интерес покупателей вблизи</Label>
     </StaticLegendContainer>
   );

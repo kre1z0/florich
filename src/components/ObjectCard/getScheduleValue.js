@@ -28,7 +28,19 @@ export const getWeekDay = weekDay => {
 
 const isHolyday = schedule => !schedule[0][0];
 
-export const getScheduleValue = (workWeek = []) => {
+export const getScheduleValue = (string = "") => {
+  console.info("--> getScheduleValue ggwp 4444", string);
+  let workWeek = [];
+  if (string) {
+    try {
+      const replacedSingleQuote = string.replace(/'/g, '"');
+      workWeek = JSON.parse(replacedSingleQuote);
+    } catch (e) {
+      console.error("неверный формат json");
+      return "График работы не известен";
+    }
+  }
+
   const currentDate = new Date();
   const currentYear = getYear(currentDate);
   const currentMonth = getMonth(currentDate);

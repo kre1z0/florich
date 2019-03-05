@@ -12,4 +12,9 @@ export const LicenseContainer = styled("div")`
     color: rgba(0, 0, 0, 0.54);
     text-decoration: none;
   }
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
+    bottom: 0;
+    right: 0;
+  }
 `;

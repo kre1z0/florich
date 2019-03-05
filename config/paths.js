@@ -14,7 +14,7 @@ module.exports = {
   nodeModules: resolve("../node_modules"),
   packageFile: resolve("../package.json"),
   packageLockFile: resolve("../package-lock.json"),
-  staticPath: "feb23/static",
+  staticPath: "mar8/static",
 
   evergis: resolve("../node_modules/@evergis/sp-api/source"),
   sgis: resolve("../node_modules/@evergis/sgis/source")
