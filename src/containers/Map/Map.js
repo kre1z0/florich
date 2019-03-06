@@ -34,6 +34,7 @@ import { ObjectCard } from "../../components/ObjectCard/ObjectCard";
 import { Controls } from "../../components/Controls/Controls";
 import { LocationDialog } from "../../components/LocationDialog/LocationDialog";
 import { InfoDialog } from "../../components/InfoDialog/InfoDialog";
+import { NotInMoscowDialog } from "../../components/NotInMoscowDialog/NotInMoscowDialog";
 
 const baseLayer = "2gis";
 
@@ -57,6 +58,8 @@ const heatmapLayers = {
   }
 };
 
+const moscowBbox = [4151015.891369915, 7470039.86704016, 4223096.009042817, 7542807.91796763];
+
 export class Map extends Component {
   constructor(props) {
     super(props);
@@ -72,6 +75,7 @@ export class Map extends Component {
       dayWeek: 5,
       locationDialogIsOpen: false,
       infoDialogIsOpen: false,
+      notInMoscowDialog: false,
       interestByDay: true,
       flowerShops: true,
       filtersIsVisible: true,
@@ -124,14 +128,9 @@ export class Map extends Component {
     }
   }
 
-  setLocationPoint = currentCoordinate => {
-    const Point = new PointFeature(currentCoordinate, webMercator, {
-      symbol: this.locationSymbol,
-      crs: this.map.crs
-    });
-
+  setLocationPoint = point => {
     this.currentLocationLayer.features = [];
-    this.currentLocationLayer.add([Point]);
+    this.currentLocationLayer.add([point]);
   };
 
   setSelectedSymbol = position => {
@@ -147,11 +146,32 @@ export class Map extends Component {
     navigator.geolocation.getCurrentPosition(
       location => {
         const currentCoordinate = [location.coords.latitude, location.coords.longitude];
-        this.onZoomToPoints(currentCoordinate, this.map.minResolution);
-        this.setLocationPoint(currentCoordinate);
+        const webMercatorPoint = new PointFeature(currentCoordinate, this.map.crs).projectTo(
+          webMercator
+        );
+
+        const Point = new PointFeature(webMercatorPoint.position, {
+          symbol: this.locationSymbol,
+          crs: this.map.crs
+        });
+
+        const bbox = new Bbox(
+          [moscowBbox[0], moscowBbox[1]],
+          [moscowBbox[2], moscowBbox[3]],
+          this.map.crs
+        );
+
+        const inMoscow = bbox.contains(webMercatorPoint);
+
+        if (inMoscow) {
+          this.onZoomToPoints(currentCoordinate, this.map.minResolution);
+          this.setLocationPoint(Point);
+        } else {
+          this.setState({ notInMoscowDialog: true });
+        }
       },
       () => {
-        this.setState({ locationDialogIsOpen: false });
+        this.setState({ locationDialogIsOpen: true });
       }
     );
   };
@@ -240,33 +260,6 @@ export class Map extends Component {
 
   init() {
     const { dayWeek } = this.state;
-
-    const browser = Bowser.getParser(window.navigator.userAgent);
-    const { parsedResult } = browser;
-    const { platform, os } = parsedResult;
-    const isMobile = platform.type === "mobile";
-    const isTablet = platform.type === "tablet";
-    const isIos = os.name === "iOS";
-
-    if ((isMobile || isTablet) && isIos) {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          this.setState({
-            locationDialogIsOpen: false
-          });
-        },
-        () => {
-          this.setState({ locationDialogIsOpen: true });
-        }
-      );
-    } else {
-      navigator.permissions.query({ name: "geolocation" }).then(({ state }) => {
-        // granted prompt denied
-        if (state !== "granted") {
-          this.setState({ locationDialogIsOpen: true });
-        }
-      });
-    }
 
     const sp = new SpatialProcessor({
       url: "https://public.everpoint.ru/sp/",
@@ -423,6 +416,12 @@ export class Map extends Component {
     }
   };
 
+  onSwipedNotInMoscowDialog = ({ isDown, yRatio }) => {
+    if (isDown && yRatio > 40) {
+      this.setState({ notInMoscowDialog: false });
+    }
+  };
+
   onRefPanel = ref => {
     if (ref) {
       this.panel = ref;
@@ -435,6 +434,7 @@ export class Map extends Component {
       objects,
       selectedObjectIndex,
       locationDialogIsOpen,
+      notInMoscowDialog,
       infoDialogIsOpen,
       interestByDay,
       flowerShops,
@@ -495,6 +495,11 @@ export class Map extends Component {
             onSwiped={this.onSwipedInfoDialog}
             isOpen={infoDialogIsOpen}
             onCloseRequest={() => this.setState({ infoDialogIsOpen: false })}
+          />
+          <NotInMoscowDialog
+            isOpen={notInMoscowDialog}
+            onSwiped={this.onSwipedNotInMoscowDialog}
+            onCloseRequest={() => this.setState({ notInMoscowDialog: false })}
           />
           <License />
         </MapWrapper>
