@@ -54,8 +54,15 @@ export const MainTitle = styled(H3)`
 `;
 
 export const SubTitle = styled("div")`
-  font-size: 12px;
-  color: ${({ theme: { palette } }) => palette.textSecondary};
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+`;
+
+export const Strong = styled("strong")`
+  padding-top: 4px;
+  color: #fff;
+  font-weight: 600;
+  display: block;
 `;
 
 export const Content = styled("div")`

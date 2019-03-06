@@ -16,7 +16,8 @@ import {
   ZoomToButton,
   CloseButton,
   SubTitle,
-  FieldValue
+  FieldValue,
+  Strong
 } from "./styled";
 
 export class ObjectCard extends PureComponent {
@@ -64,7 +65,10 @@ export class ObjectCard extends PureComponent {
                     />
                   )}
                   <MainTitle>{name}</MainTitle>
-                  <SubTitle>{getWeightText(weight)}</SubTitle>
+                  <SubTitle>
+                    Популярность среди покупателей
+                    <Strong>{getWeightText(weight)}</Strong>
+                  </SubTitle>
                 </Title>
                 <ZoomToButton kind="zoom-to" onClick={() => zoomToFeature(extent)} />
                 <CloseButton kind="close" onClick={onClose} />
