@@ -5,11 +5,11 @@ export const LicenseContainer = styled("div")`
   position: absolute;
   bottom: 4px;
   right: 4px;
-  height: 16px;
+  height: 20px;
   a {
     display: inline-block;
-    height: 16px;
     text-decoration: none;
+    height: 20px;
     &:first-child {
       margin-right: 10px;
     }
@@ -18,5 +18,5 @@ export const LicenseContainer = styled("div")`
 
 export const Logo = styled(`img`)`
   width: auto;
-  height: 16px;
+  height: 20px;
 `;

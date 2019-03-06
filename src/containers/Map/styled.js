@@ -36,6 +36,9 @@ export const FilterButton = styled(IconButton)`
     left: 50%;
     transform: translateX(-50%);
     bottom: 14px;
+    @media (max-width: 360px) {
+      bottom: 32px;
+    }
   }
 `;
 
