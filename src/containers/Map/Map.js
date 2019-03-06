@@ -16,12 +16,14 @@ import { ServiceGroupService } from "evergis/services/ServiceGroupService";
 import { StaticSourceService } from "evergis/services/StaticSourceService";
 import { TileService } from "evergis/services/TileService";
 import { Color } from "sgis/utils/Color";
+import { webMercator } from "sgis/Crs";
 
 import { Helmet } from "../../components/Helmet/Helmet";
 import { OutsideLink } from "../../components/OutsideLink/OutsideLink";
 import { FlowerIcon } from "../../components/SvgIcons/FlowerIcon";
 import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 
+import locationPin from "./location.png";
 import { getElementWidthAndHeight } from "../../utils/dom";
 import { ViewportHeight } from "../../components/ViewportHeight/ViewportHeight";
 import selectedPin from "./flpin42_select.png";
@@ -86,11 +88,11 @@ export class Map extends Component {
     source: selectedPin
   });
 
-  locationSymbol = new PointSymbol({
-    size: 20,
-    strokeColor: "#3D3D3D",
-    strokeWidth: 4,
-    fillColor: "#fff"
+  locationSymbol = new StaticImageSymbol({
+    width: 14,
+    height: 14,
+    anchorPoint: [7, 7],
+    source: locationPin
   });
 
   layer = new FeatureLayer();
@@ -122,8 +124,8 @@ export class Map extends Component {
     }
   }
 
-  setLocationPoint = () => {
-    const Point = new PointFeature(this.map.centerPoint.position, {
+  setLocationPoint = currentCoordinate => {
+    const Point = new PointFeature(currentCoordinate, webMercator, {
       symbol: this.locationSymbol,
       crs: this.map.crs
     });
@@ -142,15 +144,20 @@ export class Map extends Component {
   };
 
   goToLocation = () => {
-    navigator.geolocation.getCurrentPosition(location => {
-      const currentCoordinate = [location.coords.latitude, location.coords.longitude];
-      this.onZoomToPoints(currentCoordinate, this.map.minResolution);
-      this.setLocationPoint(currentCoordinate);
-    });
+    navigator.geolocation.getCurrentPosition(
+      location => {
+        const currentCoordinate = [location.coords.latitude, location.coords.longitude];
+        this.onZoomToPoints(currentCoordinate, this.map.minResolution);
+        this.setLocationPoint(currentCoordinate);
+      },
+      () => {
+        this.setState({ locationDialogIsOpen: false });
+      }
+    );
   };
 
   onZoomToPoints = (position = [55.7417, 37.6275], zoom = 8) =>
-    this.map.setPosition(new PointFeature(position), zoom);
+    this.map.animateTo(new PointFeature(position), zoom);
 
   setObjects = features => {
     if (features.length === 0) {
@@ -382,11 +389,19 @@ export class Map extends Component {
   }
 
   onEnableGeolocation = () =>
-    navigator.geolocation.getCurrentPosition(() => {
-      this.setState({
-        locationDialogIsOpen: false
-      });
-    });
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        this.setState({
+          locationDialogIsOpen: false
+        });
+      },
+      error => {
+        console.error(error.message);
+        this.setState({
+          locationDialogIsOpen: false
+        });
+      }
+    );
 
   onToggleFilters = () => this.setState({ filtersIsVisible: !this.state.filtersIsVisible });
 
