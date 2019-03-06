@@ -189,6 +189,12 @@ export class Map extends Component {
   };
 
   onMapClick = ({ point }) => {
+    const { flowerShops } = this.state;
+
+    if (!flowerShops) {
+      return;
+    }
+
     const resolution = this.map.resolution;
 
     const buffer = resolution * 20;
@@ -211,7 +217,10 @@ export class Map extends Component {
         services: [flowerShopsLayer]
       })
       .then(features => this.setObjects(features))
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error(error);
+        this.setState({ hasError: true });
+      });
   };
 
   mapOffset = () => {
@@ -273,6 +282,7 @@ export class Map extends Component {
       })
       .catch(error => {
         console.error(error);
+        this.setState({ hasError: true });
       });
   }
 
@@ -341,6 +351,10 @@ export class Map extends Component {
         } else if (name === "flowerShops") {
           this.onServiceDisplay(flowerShopsLayer, value);
           this.mapOffset();
+
+          if (!value) {
+            this.onCloseObjectCard();
+          }
         }
       }
     );
@@ -419,10 +433,8 @@ export class Map extends Component {
         <Error>
           Houston, we have a problem.
           <br />
-          Something went wrong.
-          <br />
           <OutsideLink style={{ fontSize: 20 }} href="https://mar8.everpoint.ru/" target="_self">
-            reload page
+            перезагрузить страницу
           </OutsideLink>
         </Error>
       );
