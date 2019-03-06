@@ -5,16 +5,18 @@ export const LicenseContainer = styled("div")`
   position: absolute;
   bottom: 4px;
   right: 4px;
-  font-size: 9px;
-  background-color: rgba(255, 255, 255, 0.7);
-  color: rgba(0, 0, 0, 0.54);
+  height: 16px;
   a {
-    color: rgba(0, 0, 0, 0.54);
+    display: inline-block;
+    height: 16px;
     text-decoration: none;
+    &:first-child {
+      margin-right: 10px;
+    }
   }
-  @media (max-width: 767px) and (orientation: portrait),
-    (max-width: 812px) and (orientation: landscape) {
-    bottom: 0;
-    right: 0;
-  }
+`;
+
+export const Logo = styled(`img`)`
+  width: auto;
+  height: 16px;
 `;
