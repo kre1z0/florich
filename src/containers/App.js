@@ -23,6 +23,7 @@ injectGlobal`
   }
   ${Overlay} {
     background-color: rgba(255, 243, 248, 0.65);
+    height: calc(var(--vh, 1vh) * 100);
   }
 `;
 

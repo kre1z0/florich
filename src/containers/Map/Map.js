@@ -127,6 +127,7 @@ export class Map extends Component {
       symbol: this.locationSymbol,
       crs: this.map.crs
     });
+
     this.currentLocationLayer.features = [];
     this.currentLocationLayer.add([Point]);
   };
@@ -144,7 +145,7 @@ export class Map extends Component {
     navigator.geolocation.getCurrentPosition(location => {
       const currentCoordinate = [location.coords.latitude, location.coords.longitude];
       this.onZoomToPoints(currentCoordinate, this.map.minResolution);
-      this.setLocationPoint();
+      this.setLocationPoint(currentCoordinate);
     });
   };
 
