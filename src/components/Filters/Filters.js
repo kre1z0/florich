@@ -8,6 +8,7 @@ import {
   Title,
   CloseButton,
   Block,
+  SecondBlock,
   Switch,
   Slider,
   Swiper
@@ -22,14 +23,14 @@ export const Filters = ({
   interestByDay,
   flowerShops,
   onSwiped,
-  onRefPanel,
+  onRefPanel
 }) => (
   <FiltersContainer isVisible={isVisible}>
     <Swiper onSwiped={onSwiped} onRef={onRefPanel}>
       <Divider />
       <Block>
         <Header>
-          <Title>Интерес по дням</Title>
+          <Title>Как растет спрос на цветы в преддверии праздника</Title>
           <Switch
             checked={interestByDay}
             onChange={() => onFilterChange(!interestByDay, "interestByDay")}
@@ -48,16 +49,16 @@ export const Filters = ({
           disabled={!interestByDay}
         />
       </Block>
-      <Block>
+      <SecondBlock>
         <Header>
-          <Title>Цветочные магазины</Title>
+          <Title>Самые популярные точки продаж цветов</Title>
           <Switch
             checked={flowerShops}
             onChange={() => onFilterChange(!flowerShops, "flowerShops")}
           />
         </Header>
         <StaticLegend disabled={!flowerShops} />
-      </Block>
+      </SecondBlock>
       <CloseButton kind="close" onClick={onToggleFilters} />
     </Swiper>
   </FiltersContainer>

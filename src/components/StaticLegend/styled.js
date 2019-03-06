@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const StaticLegendContainer = styled("div")`
-  padding: 10px 0 0 0;
+  padding: 12px 0 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,11 +20,15 @@ export const StaticLegendContainer = styled("div")`
 `;
 
 export const Label = styled("div")`
-  padding-top: 10px;
+  padding: 10px 15px 0 15px;
   text-align: center;
   width: 100%;
   font-size: 12px;
   color: rgba(0, 0, 0, 0.54);
+  @media (max-width: 767px) and (orientation: portrait),
+    (max-width: 812px) and (orientation: landscape) {
+    padding: 10px 0 0 0;
+  }
 `;
 
 export const Circle = styled("div")`

@@ -264,7 +264,8 @@ export class Map extends Component {
     const sp = new SpatialProcessor({
       url: "https://public.everpoint.ru/sp/",
       services: [baseLayer, flowerShopsLayer],
-      mapWrapper: this.wrapper
+      mapWrapper: this.wrapper,
+      resolution: 145
     });
 
     const { map, painter, layerManager } = sp;

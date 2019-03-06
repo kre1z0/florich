@@ -9,7 +9,7 @@ export const StaticLegend = ({ disabled }) => {
       <Circle disabled={disabled} />
       <FlowerIcon20 disabled={disabled} />
       <FlowerIcon32 disabled={disabled} />
-      <Label>Интерес покупателей вблизи</Label>
+      <Label>Чем выше спрос рядом с магазином цветов, тем больше цветочек</Label>
     </StaticLegendContainer>
   );
 };
