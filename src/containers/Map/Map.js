@@ -450,7 +450,7 @@ export class Map extends Component {
         <Error>
           Houston, we have a problem.
           <br />
-          <OutsideLink style={{ fontSize: 20 }} href="https://mar8.everpoint.ru/" target="_self">
+          <OutsideLink href="https://mar8.everpoint.ru/" target="_self">
             перезагрузить страницу
           </OutsideLink>
         </Error>
