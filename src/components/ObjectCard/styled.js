@@ -4,7 +4,8 @@ import {
   Blank,
   FieldValue as FieldValueUI,
   PaginationSimple as PaginationSimpleUI,
-  IconButton as IconButtonUI
+  IconButton as IconButtonUI,
+  Icon
 } from "@evergis/ui";
 import { getHeaderColorByWeight } from "./getHeaderColorByWeight";
 
@@ -87,6 +88,12 @@ export const PaginationSimple = styled(PaginationSimpleUI)`
     position: absolute;
     top: 5px;
     left: 12px;
+  }
+  ${Icon} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 `;
 

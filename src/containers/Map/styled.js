@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { Icon } from "@evergis/ui";
 
 import { IconButton } from "../../components/Controls/styled";
 import { Swiper as SwiperUI } from "../../components/Swiper/Swiper";
@@ -16,7 +17,7 @@ export const FilterButton = styled(IconButton)`
   top: 15px;
   left: 15px;
   background-color: ${({ theme: { palette } }) => palette.primary};
-  > span {
+  ${Icon} {
     &:after {
       content: "";
     }

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Bowser from "bowser";
+import throttle from "lodash/throttle";
 import { SpatialProcessor } from "@evergis/sp-api/SpatialProcessor";
 import { Bbox } from "sgis/Bbox";
 import { Polygon } from "sgis/features/Polygon";
@@ -25,6 +25,7 @@ import { HeatmapLayer } from "../../components/HeatmapLayer/HeatmapLayer";
 
 import locationPin from "./location.png";
 import { getElementWidthAndHeight } from "../../utils/dom";
+import { isMobile, isTablet } from "../../utils/browser";
 import { ViewportHeight } from "../../components/ViewportHeight/ViewportHeight";
 import selectedPin from "./flpin42_select.png";
 import { MapWrapper, FilterButton, Error, Swiper } from "./styled";
@@ -63,12 +64,6 @@ const moscowBbox = [4151015.891369915, 7470039.86704016, 4223096.009042817, 7542
 export class Map extends Component {
   constructor(props) {
     super(props);
-
-    const browser = Bowser.getParser(window.navigator.userAgent);
-    const { parsedResult } = browser;
-    const { platform } = parsedResult;
-    const isMobile = platform.type === "mobile";
-
     this.state = {
       selectedObjectIndex: 0,
       objects: [],
@@ -81,8 +76,10 @@ export class Map extends Component {
       filtersIsVisible: true,
       hasError: false,
       panelHeight: 0,
-      isMobile
+      isMobile: isMobile()
     };
+
+    this.onResizeThrottled = throttle(this.onResize, 44);
   }
 
   selectedSymbol = new StaticImageSymbol({
@@ -103,15 +100,26 @@ export class Map extends Component {
   currentLocationLayer = new FeatureLayer();
   heatmapLayer = null;
   panel = null;
+  interval = 0;
+  timeout = 0;
+  panelHeight = 0;
 
   componentDidMount() {
     this.mapOffset();
-    window.addEventListener("resize", this.mapOffset);
     this.init();
+
+    if (isMobile() || isTablet()) {
+      window.addEventListener("orientationchange", this.onOrientationChange);
+    } else {
+      window.addEventListener("resize", this.onResizeThrottled);
+    }
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.mapOffset);
+    clearInterval(this.interval);
+    clearTimeout(this.timeout);
+    window.removeEventListener("resize", this.onResizeThrottled);
+    window.removeEventListener("orientationchange", this.onOrientationChange);
     this.map.off("click", this.onMapClick);
   }
 
@@ -125,8 +133,38 @@ export class Map extends Component {
       if (nextPosition) {
         this.setSelectedSymbol(nextPosition);
       }
+      this.mapOffset();
     }
   }
+
+  onResize = () => this.mapOffset();
+
+  onOrientationChange = () => {
+    clearInterval(this.interval);
+    clearTimeout(this.timeout);
+
+    if (this.panel) {
+      this.interval = setInterval(() => {
+        const { height } = getElementWidthAndHeight(this.panel);
+
+        if (this.panelHeight !== height) {
+          this.mapOffset();
+        }
+        this.panelHeight = height;
+      }, 4);
+      this.timeout = setTimeout(() => {
+        clearInterval(this.interval);
+        this.panelHeight = 0;
+      }, 240);
+    }
+  };
+
+  mapOffset = () => {
+    if (this.panel) {
+      const { height } = getElementWidthAndHeight(this.panel);
+      this.setState({ panelHeight: height });
+    }
+  };
 
   setLocationPoint = point => {
     this.currentLocationLayer.features = [];
@@ -249,13 +287,6 @@ export class Map extends Component {
         console.error(error);
         this.setState({ hasError: true });
       });
-  };
-
-  mapOffset = () => {
-    if (this.panel) {
-      const { height } = getElementWidthAndHeight(this.panel);
-      this.setState({ panelHeight: height });
-    }
   };
 
   init() {

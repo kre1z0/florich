@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { IconButton as IconButtonUi } from "@evergis/ui";
+import { IconButton as IconButtonUi, Icon } from "@evergis/ui";
 
 export const IconButton = styled(IconButtonUi)`
   width: 40px;
@@ -11,7 +11,11 @@ export const IconButton = styled(IconButtonUi)`
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
-  > span {
+  ${Icon} {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     &:after {
       color: ${({ theme: { palette } }) => palette.primary};
       opacity: 0.85;
@@ -29,7 +33,7 @@ export const IconButton = styled(IconButtonUi)`
 `;
 
 export const ButtonInfo = styled(IconButton)`
-  > span {
+  ${Icon} {
     &:after {
       content: "";
     }
@@ -63,7 +67,7 @@ export const ButtonZoomOut = styled(IconButton)`
 
 export const ButtonLocation = styled(IconButton)`
   transform: translateY(calc(300% + 68px));
-  > span {
+  ${Icon} {
     &:after {
       content: "";
     }

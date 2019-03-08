@@ -61,7 +61,16 @@ export const Title = styled(H4)`
   justify-content: space-around;
 `;
 
-export const Switch = styled(SwitchUI)``;
+export const Switch = styled(SwitchUI)`
+  > span {
+    > div {
+      &:after {
+        top: 0;
+        left: 0;
+      }
+    }
+  }
+`;
 
 export const Slider = styled(SliderUi)`
   margin-top: 15px;
